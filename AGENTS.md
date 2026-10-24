@@ -35,3 +35,71 @@ A Chicago date-night and outing planner. The user picks a vibe, distance and bud
 - Append to `process-log.md`: what the user asked, what you made, where the user pushed back, and what the user caught.
 
 ## Data model
+
+Two Supabase tables. `user_id` is the Clerk user ID (`text`, like `user_2abc…`, not a UUID), filled in by default from `auth.jwt()->>'sub'`. There is no foreign key to Supabase's `auth.users`, because users live in Clerk.
+
+### `preferences`: one row per user
+
+| Column | Type | Rules |
+|---|---|---|
+| `user_id` | `text` | Primary key |
+| `home_label` | `text` | Not empty. A neighborhood name, or "My location" |
+| `home_lat`, `home_lng` | `double precision` | -90 to 90, -180 to 180 |
+| `max_distance_miles` | `smallint` | 1 to 50 |
+| `budget_for_two` | `numeric(8,2)` | At least 0 |
+| `free_nights` | `smallint[]` | Recurring weekdays, 0 (Sun) to 6 (Sat). At least one. Editable |
+| `vibes` | `text[]` | Only vibe keys from the list below. Empty means any vibe |
+| `created_at`, `updated_at` | `timestamptz` | Default `now()` |
+
+Home base is set by picking a neighborhood or using the browser's location. Search can use the same choices to override the starting point for that search only. That override is not stored.
+
+### `plans`: saved events and their outcome
+
+| Column | Type | Rules |
+|---|---|---|
+| `id` | `uuid` | Primary key, default `gen_random_uuid()` |
+| `user_id` | `text` | Required |
+| `tm_event_id` | `text` | Required. Unique per user: `unique (user_id, tm_event_id)` |
+| `name` | `text` | Required |
+| `starts_at` | `timestamptz` | Required |
+| `ends_at` | `timestamptz` | Optional. Must be after `starts_at` |
+| `venue_name` | `text` | Required |
+| `venue_address` | `text` | Optional |
+| `venue_lat`, `venue_lng` | `double precision` | Optional. -90 to 90, -180 to 180 |
+| `ticket_url` | `text` | Required. Starts with `https://` |
+| `image_url` | `text` | Optional. Starts with `https://` |
+| `price_min`, `price_max` | `numeric(8,2)` | Optional; empty means price unknown. `min >= 0`, `max >= min` |
+| `status` | `text` | `saved`, `planned` or `went`. Default `saved` |
+| `rating` | `smallint` | Optional. 1 to 5 |
+| `note` | `text` | Optional. At most 1,000 characters |
+| `created_at`, `updated_at` | `timestamptz` | Default `now()` |
+
+- At most one `planned` row per user: a unique index on `user_id` where `status = 'planned'`. Any number can be `saved`.
+- `rating` and `note` must be empty unless `status = 'went'`.
+- Enforced in the app, not the database: an event can only become `went` after `starts_at`. The snapshot is built on the server from Ticketmaster using the event ID, never from data sent by the browser.
+- Shortlist = `saved`, plan = `planned`, history = `went`. The cost split for two is calculated when shown, not stored.
+
+### Row-level security
+
+RLS is on for both tables. Policies apply to the `authenticated` role only, so signed-out requests get nothing. "Own" means `user_id = (select auth.jwt()->>'sub')`.
+
+| Table | Read | Create | Update | Delete |
+|---|---|---|---|---|
+| `preferences` | Own row | Own row | Own row before and after | Not allowed |
+| `plans` | Own rows | Own rows | Own rows before and after | Own rows |
+
+Database calls run on the server with the user's Clerk session token. The Supabase service-role key is never used in request code.
+
+### Vibes
+
+An event can match several vibes. The mapping to Ticketmaster categories, start times and the 21+ note lives in code. Confirm genre names against Ticketmaster's classifications list before writing it.
+
+- `all_dressed_up`, All Dressed Up: seated shows worth dressing for (theatre, opera, dance, classical).
+- `laugh_together`, Laugh Together: stand-up and improv.
+- `cozy_and_close`, Cozy & Close: low-key nights (jazz, blues, folk, acoustic music, movies, other quiet activities).
+- `night_out`, Night Out: parties, dances, late nights (dance/electronic, hip-hop, R&B, Latin, or starts 9pm or later).
+- `concerts`, Concerts: pop, rock, country, alternative and other shows.
+- `cheer_together`, Cheer Together: sports.
+- `try_something_new`, Try Something New: exhibits, magic, festivals, oddities.
+- `grown_ups_only`, Grown-Ups Only: 21+ events, based on `pleaseNote`.
+- `daytime_date`, Daytime Date: anything starting before 5pm.
