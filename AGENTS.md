@@ -12,6 +12,12 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 A Chicago date-night and outing planner. The user picks a vibe, distance and budget → browses Chicago events on their free nights (Ticketmaster Discovery API) → saves the ones they like to a shortlist → chooses one as the plan, with the cost split for two and an "add to calendar" link → after the night, rates it and it shows up in their history.
 
+## Product rules
+
+- Events with no price are still shown, labeled "price unknown".
+- Family events are never hidden. They appear under whichever vibes they match.
+- The add-to-calendar link is a Google Calendar link only, with no `.ics` file.
+
 ## Stack
 
 - Next.js App Router + Tailwind

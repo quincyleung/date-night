@@ -76,3 +76,10 @@
   - Added `docs/data-model.md`: an ER diagram with the Clerk user linked to zero or one `preferences` row and any number of `plans` rows, every column listed, plus short notes on what each table holds and how ownership works (Clerk ID in `user_id`, filled in automatically, RLS).
 - **Pushed back:** None.
 - **Caught:** None.
+
+## Step 6: Product rules in AGENTS.md (2026-10-24)
+
+- **Asked:** Push, then add the three agreed product rules that weren't in AGENTS.md so future sessions see them.
+- **Made:** Pushed. Added a short "Product rules" section after "The idea": events with no price are shown labeled "price unknown", family events are never hidden, and the calendar link is Google Calendar only.
+- **Pushed back:** None.
+- **Caught:** None.
