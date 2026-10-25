@@ -99,3 +99,14 @@
 - **Not committed:** Clerk's agent skills (`.agents/skills`, the `.claude/skills` links, `skills-lock.json`), pending the user's decision.
 - **Pushed back:** None.
 - **Caught:** None.
+
+## Step 7 follow-up: Clerk agent skills (2026-10-25, branch `auth`)
+
+- **Asked:** The user tried the signed-out landing page in the dev server, said they were done testing, and asked to commit Clerk's agent skills.
+- **Made:**
+  - Stopped the dev server.
+  - Committed `.agents/skills` (8 Clerk skills), the `.claude/skills` links to them (relative, so they work after a clone) and `skills-lock.json`.
+  - Checked first for real keys: the only matches were placeholder text in the docs, such as `sk_test_xxx`.
+- **Still open:** Whether to keep the Next.js agent-feedback block that `next dev` added to AGENTS.md (left uncommitted), and whether to add a rule that every data page and Server Function calls `auth.protect()`.
+- **Pushed back:** None.
+- **Caught:** None.
