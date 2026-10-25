@@ -44,3 +44,19 @@
     - Cozy & Close now includes movies and low-key activities.
     - Renamed All Dressed Up and Concerts.
 - **Caught:** I had read "use my location" as applying to search only. The user meant both setting the home base and searching.
+
+## Step 4: Vibe checks against real Ticketmaster data (2026-10-24)
+
+- **Asked:** Push, then run two checks before locking the vibe mapping: Ticketmaster's official category list, and how many upcoming Chicago events each vibe would match. The user OK'd me running it with their key.
+- **Made:**
+  - Pushed. Ran a throwaway script, not in the repo, that loads `.env.local` and saves responses with the key blanked out.
+  - Pulled the category list (6 top-level categories) and the first 1,000 of 1,747 Chicago events in the next 30 days. Those 1,000 covered only Oct 24–Nov 11, and 532 of them were Balloon Museum time slots.
+  - After merging repeats and dropping cancelled events: 438 show-nights, 290 different shows. Counted matches per vibe, using categories alone and using categories plus words in the name.
+- **Findings:**
+  - Categories alone miss a lot. Second City isn't filed as Comedy, Shakespeare is filed as "Performance Art", and some concerts and comedians have no category at all. Matching words like "improv" or "Second City" takes Laugh Together from 12 to 30 show-nights.
+  - Thin vibes: Try Something New is 9 different things, All Dressed Up 15, Laugh Together 12. Concerts has 169.
+  - Status values include `cancelled` (two Ls) and `rescheduled`.
+  - Some listings aren't events (e.g. "NOT AN EVENT TICKET", upsell types) and need filtering.
+  - 18% of show-nights had a price.
+- **Pushed back:** None.
+- **Caught:** None.
