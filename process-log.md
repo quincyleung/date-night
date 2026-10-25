@@ -58,5 +58,10 @@
   - Status values include `cancelled` (two Ls) and `rescheduled`.
   - Some listings aren't events (e.g. "NOT AN EVENT TICKET", upsell types) and need filtering.
   - 18% of show-nights had a price.
+- **Decisions:**
+  - Match vibes on categories plus words in the name.
+  - Keep all nine vibes, as long as each has a good total. With words, the lowest are about 29–30 show-nights in 19 days.
+  - Rewrote the AGENTS.md vibe section as a table of official category names and words.
+  - Added Food & Drink and Lecture/Seminar to Cozy & Close to cover "low-key activities".
 - **Pushed back:** None.
 - **Caught:** None.

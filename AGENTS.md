@@ -92,14 +92,16 @@ Database calls run on the server with the user's Clerk session token. The Supaba
 
 ### Vibes
 
-An event can match several vibes. The mapping to Ticketmaster categories, start times and the 21+ note lives in code. Confirm genre names against Ticketmaster's classifications list before writing it.
+An event can match several vibes. A vibe matches on the event's primary Ticketmaster category **or** on words in the event or venue name (case-insensitive), because categories alone miss events. For example, Second City isn't filed as Comedy. Category names are Ticketmaster's official ones, checked 2026-10-24. The mapping lives in code.
 
-- `all_dressed_up`, All Dressed Up: seated shows worth dressing for (theatre, opera, dance, classical).
-- `laugh_together`, Laugh Together: stand-up and improv.
-- `cozy_and_close`, Cozy & Close: low-key nights (jazz, blues, folk, acoustic music, movies, other quiet activities).
-- `night_out`, Night Out: parties, dances, late nights (dance/electronic, hip-hop, R&B, Latin, or starts 9pm or later).
-- `concerts`, Concerts: pop, rock, country, alternative and other shows.
-- `cheer_together`, Cheer Together: sports.
-- `try_something_new`, Try Something New: exhibits, magic, festivals, oddities.
-- `grown_ups_only`, Grown-Ups Only: 21+ events, based on `pleaseNote`.
-- `daytime_date`, Daytime Date: anything starting before 5pm.
+| Key | Name | Categories | Or words in name |
+|---|---|---|---|
+| `all_dressed_up` | All Dressed Up | Arts & Theatre: Theatre, Opera, Dance, Classical, Performance Art. Music: Classical | orchestra, symphony, philharmonic, opera, ballet, shakespeare |
+| `laugh_together` | Laugh Together | Comedy genre (it appears under Arts & Theatre, Miscellaneous and Film). Comedian subtype | comedy, comedian, improv, second city, stand-up |
+| `cozy_and_close` | Cozy & Close | Music: Jazz, Blues, Folk, any Acoustic subgenre. Film. Miscellaneous: Food & Drink, Lecture/Seminar | jazz, acoustic, drive-in, unplugged |
+| `night_out` | Night Out | Music: Dance/Electronic, Hip-Hop/Rap, R&B, Latin, Reggae. Party/Gala event style. Club venue type. Or starts 9pm or later | party, DJ, dance night, rave |
+| `concerts` | Concerts | Music, except Jazz, Blues, Folk, Classical | |
+| `cheer_together` | Cheer Together | Sports | "vs", "vs." |
+| `try_something_new` | Try Something New | Miscellaneous. Arts & Theatre: Magic & Illusion, Circus & Specialty Acts, Fine Art, Puppetry, Spectacular, Variety, Multimedia. Venue Based and Transportation types. Exhibit, Sightseeing/Facility, Festival, Expo, Tour event styles | |
+| `grown_ups_only` | Grown-Ups Only | | "21+", "21 and over", "21 years", "ages 21" in the name, `pleaseNote`, `info` or `description` |
+| `daytime_date` | Daytime Date | Any category, starting before 5pm local time | |
