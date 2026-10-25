@@ -83,3 +83,19 @@
 - **Made:** Pushed. Added a short "Product rules" section after "The idea": events with no price are shown labeled "price unknown", family events are never hidden, and the calendar link is Google Calendar only.
 - **Pushed back:** None.
 - **Caught:** None.
+
+## Step 7: Sign-in, sign-up, sign-out and route protection (2026-10-24, branch `auth`)
+
+- **Asked:** Clerk is initialized (the user ran `clerk init`). Add sign-in, sign-up and sign-out with a simple header. Protect every route except the landing page using middleware, so a signed-out visitor can't reach any data. The landing page explains the tool and shows no one's data. Commit and log.
+- **Made:**
+  - Helped with `clerk init`: chose `--login` (a real development app, keys in `.env.local`) over temporary accountless keys, created a new Clerk app, and installed Clerk's agent skills for Claude Code at project scope.
+  - Committed the CLI's output separately (`2ab7cd5`): `@clerk/nextjs` 7.9.20, `ClerkProvider` in the layout, a bare `clerkMiddleware` in `proxy.ts`, and the sign-in and sign-up pages.
+  - `proxy.ts` (Next 16's name for middleware) denies by default. Only `/`, `/sign-in/…` and `/sign-up/…` are public; everything else calls `auth.protect()`, which redirects to `/sign-in`. Used a short hand-written allowlist because Clerk 7 deprecates `createRouteMatcher`.
+  - Header shows Sign in and Sign up when signed out, and Sign out when signed in. It shows no name or avatar.
+  - Landing page explains the four steps and lists the vibes, with no user data.
+  - Wrapped the sign-in and sign-up forms in `<Suspense>`, which Cache Components requires.
+  - Checked: lint and build pass. Signed out: public pages return 200; every other path, including look-alikes like `/Sign-In` and API paths, redirects to `/sign-in`.
+- **Flagged:** Clerk 7 and the Next 16 docs both say middleware alone isn't enough. Server Functions are POSTs to the page that uses them, so one used on the public landing page skips the middleware. Recommended that each data page and Server Function also call `auth.protect()`.
+- **Not committed:** Clerk's agent skills (`.agents/skills`, the `.claude/skills` links, `skills-lock.json`), pending the user's decision.
+- **Pushed back:** None.
+- **Caught:** None.
