@@ -65,3 +65,14 @@
   - Added Food & Drink and Lecture/Seminar to Cozy & Close to cover "low-key activities".
 - **Pushed back:** None.
 - **Caught:** None.
+
+## Step 5: Data model diagram (2026-10-24)
+
+- **Asked:** Push, exit plan mode, write the agreed data model into AGENTS.md under "Data model", then draw a Mermaid diagram of the tables in `docs/data-model.md`. It should show what each table holds and how each row belongs to one person. Commit.
+- **Made:**
+  - Pushed.
+  - We were never in plan mode (the earlier `/plan` came through as pasted text), so there was nothing to exit.
+  - The Data model section was already complete from Steps 3–4; I rechecked it against the decisions and left it unchanged.
+  - Added `docs/data-model.md`: an ER diagram with the Clerk user linked to zero or one `preferences` row and any number of `plans` rows, every column listed, plus short notes on what each table holds and how ownership works (Clerk ID in `user_id`, filled in automatically, RLS).
+- **Pushed back:** None.
+- **Caught:** None.
