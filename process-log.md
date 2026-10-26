@@ -110,3 +110,21 @@
 - **Still open:** Whether to keep the Next.js agent-feedback block that `next dev` added to AGENTS.md (left uncommitted), and whether to add a rule that every data page and Server Function calls `auth.protect()`.
 - **Pushed back:** None.
 - **Caught:** None.
+
+## Step 8: Supabase tables, RLS and client (2026-10-26, branch `auth`)
+
+- **Asked:** Using the Supabase MCP server, create the tables from the AGENTS.md data model as migrations (also saved in `supabase/migrations/`), with RLS on every table so each person can only select, insert, update and delete rows whose `user_id` matches their Clerk user ID from the JWT. Wire up a Supabase client that sends the Clerk session token. No UI yet. Show the SQL before applying it.
+- **Made:**
+  - Setup first: walked the user through opening `.env.local` to add the Supabase URL and key (I never read the file; the user checked names with `grep`), then adding the Supabase MCP server (`.mcp.json`, no keys in it) and logging in with `/mcp`.
+  - Wrote `supabase/migrations/20261026212811_create_preferences_and_plans.sql`: both tables with every check from the data model, the one-planned-per-person index, an `updated_at` trigger, RLS with policies on `(select auth.jwt() ->> 'sub') = user_id`, and explicit permissions so signed-out visitors (`anon`) have none.
+  - Tested it on a throwaway local Postgres with stand-ins for Supabase's `auth.jwt()` and roles: user B saw none of user A's rows, A couldn't write rows as B, signed-out got "permission denied", and every check constraint fired. Showed the SQL; the user approved; applied it through the MCP server, then renamed the file to the version Supabase recorded.
+  - Installed `@supabase/supabase-js` 2.118.0 (approved). Added `lib/supabase.ts`, a server-only client whose `accessToken` is the Clerk session token, and `lib/database.types.ts`, generated from the new tables.
+  - Checked: types, lint and build pass. On Supabase: RLS on, 7 policies, security advisor clean. On the live API, signed-out reads and inserts return 401 "permission denied".
+- **Flagged:**
+  - The request said delete on every table, but the agreed data model says preferences are never deleted. Kept AGENTS.md's rule; the user approved the SQL as shown.
+  - Supabase's performance advisor warns on all 7 policies. It's a false positive: it matches the text `select auth.jwt()`, and `EXPLAIN` shows the user ID is computed once per query.
+  - Clerk's skill shows the older JWT-template way to call Supabase; used Supabase's native Clerk integration instead.
+  - Claude Code's safety check blocked me from adding the MCP server and from previewing Supabase's skills package, so the user ran those steps.
+- **Still to do (user):** Activate the Supabase integration in Clerk and add Clerk under Third-Party Auth in Supabase. Until then, signed-in queries won't work. Confirm `.env.local` uses `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+- **Pushed back:** Kept all seven MCP features (Supabase's default command) instead of the four I recommended.
+- **Caught:** None.
