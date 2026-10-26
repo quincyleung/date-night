@@ -202,3 +202,22 @@
   - Other browser warning: a hydration mismatch on `<body>` came from the Grammarly extension, not the app.
 - **Pushed back:** None.
 - **Caught:** The placeholder Supabase URL was the user's to fix; the stale form after saving was found in testing.
+
+## Step 15: Thursday events, and Discover's controls, states and Save (2026-10-26, branch `features`)
+
+- **Asked:** Why Thursday events show up when only Friday and Saturday are picked. Then: check whether Discover is done (vibe chips, distance and budget controls, results for the next free nights; loading as skeleton cards; nothing found saying which filter to loosen with a one-tap fix; Ticketmaster down with a friendly message, retry, and saved plans still reachable; "Save" on each card), build what's missing, commit, and test the down state.
+- **Made:**
+  - **Thursday events:** the saved preferences were right (`[5, 6]`). Ticketmaster's date filter matches events still running in the window, not just those starting in it, so Thursday shows ending after midnight and months-long exhibits came back for a Friday search. Confirmed in the events saved in step 4 (a Thursday 6pm blues show ending 2am Friday; an exhibit listed from September). Now only events starting on the searched dates are kept. Committed separately.
+  - **Status before this step:** results were done; loading was a spinner, the empty state was generic, the down state had no saved plans, and there were no controls or Save.
+  - **Controls** on Discover: vibe, distance and budget chips that start from the saved preferences. Each tap updates the URL and the results; the saved defaults don't change ("Change your defaults" still goes to `/welcome`), matching the AGENTS.md rule that search overrides aren't stored. Vibe and budget changes reuse the cached search; distance changes run a new one.
+  - **Loading:** six skeleton cards in the shape of real cards, shown again on every filter change.
+  - **Nothing found:** names the filter to loosen, best first, each with a one-tap button: "Nothing fits Daytime Date, but 1 event with another vibe does" → Show every vibe; events over budget → Raise budget; otherwise → Search within the next distance; at the widest distance → Pick more nights.
+  - **Ticketmaster down** (error or no answer in 10 seconds): "Ticketmaster isn't answering", a Try again button, and the person's saved events read from Supabase with their ticket links. The filters keep working.
+  - **Save** on each card: sends only the event ID; the server looks the event up on Ticketmaster and saves its own copy to `plans` (AGENTS.md rule). Saving twice is harmless. Cards for events with no announced time say "Save once the time is announced", since a plan needs a start time.
+  - Ticketmaster errors in the server log now include Ticketmaster's reason (e.g. "Invalid ApiKey"), never the key.
+  - **Tested** in headless Chrome with a new Clerk test user: skeletons on a distance change; 326 → 148 events going from 10 to 5 miles; budget and vibe taps filter at once; both empty-state fixes bring results back; two saves show "✓ Saved" and survive a reload; phone width fits. **Down state:** ran a second copy of the app with a deliberately invalid Ticketmaster key in its environment (`.env.local` untouched): message, retry (shows "Trying again…"), saved events with ticket links, filters usable, phone width fits.
+  - Found and fixed while testing: the filter bar and the results shared a React key (React warned about duplicates).
+  - The user's `next dev` again kept serving old copies of changed files (a mix of old and new code broke the filter bar there); touching the files made it recompile.
+- **Pushed back:** None.
+- **Caught:** Thursday events on a Friday-and-Saturday search.
+- **Still open:** two Ticketmaster "HTTP 400" errors in the dev log from before the tests, not reproduced; the log will now say why if it happens again.

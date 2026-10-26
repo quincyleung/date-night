@@ -32,6 +32,7 @@ export type TmEvent = {
   description?: string;
   dates?: {
     start?: { localDate?: string; localTime?: string; dateTime?: string };
+    end?: { dateTime?: string };
     status?: { code?: string };
   };
   classifications?: {
@@ -45,7 +46,13 @@ export type TmEvent = {
   priceRanges?: { type?: string; currency?: string; min?: number; max?: number }[];
   images?: { ratio?: string; width?: number; url?: string }[];
   _embedded?: {
-    venues?: { name?: string; location?: { latitude?: string; longitude?: string } }[];
+    venues?: {
+      name?: string;
+      location?: { latitude?: string; longitude?: string };
+      address?: { line1?: string };
+      city?: { name?: string };
+      state?: { stateCode?: string };
+    }[];
   };
 };
 export type TmSearchResponse = {
@@ -133,14 +140,8 @@ export function summarizeEvent(raw: TmEvent, center: LatLng): EventSummary | nul
   if (!localDate || !raw.url?.startsWith("https://")) return null;
 
   const localTime = raw.dates?.start?.localTime?.slice(0, 5) ?? null;
-  const range = raw.priceRanges?.find((p) => p.currency === "USD" && typeof p.min === "number");
-  const price =
-    range?.min !== undefined
-      ? { min: range.min, max: range.max ?? range.min, forTwo: Math.round(range.min * 200) / 100 }
-      : null;
-  const image = raw.images
-    ?.filter((i) => i.ratio === "16_9" && i.url?.startsWith("https://"))
-    .sort((a, b) => Math.abs((a.width ?? 0) - 640) - Math.abs((b.width ?? 0) - 640))[0];
+  const usd = usdPrice(raw);
+  const price = usd ? { ...usd, forTwo: Math.round(usd.min * 200) / 100 } : null;
 
   return {
     id: raw.id,
@@ -155,7 +156,7 @@ export function summarizeEvent(raw: TmEvent, center: LatLng): EventSummary | nul
     price,
     priceUnknown: price === null,
     ticketUrl: raw.url,
-    imageUrl: image?.url ?? null,
+    imageUrl: pickImage(raw),
     vibes: matchVibes({
       name: raw.name,
       venueName: venue.name ?? "",
@@ -167,6 +168,67 @@ export function summarizeEvent(raw: TmEvent, center: LatLng): EventSummary | nul
       subType: category?.subType?.name ?? "",
       notes: [raw.pleaseNote, raw.info, raw.description].filter(Boolean).join(" "),
     }),
+  };
+}
+
+// Per-ticket USD price range, or null when Ticketmaster lists none.
+function usdPrice(raw: TmEvent) {
+  const range = raw.priceRanges?.find((p) => p.currency === "USD" && typeof p.min === "number");
+  if (range?.min === undefined) return null;
+  return { min: range.min, max: Math.max(range.max ?? range.min, range.min) };
+}
+
+// A 16:9 image close to 640 px wide.
+function pickImage(raw: TmEvent): string | null {
+  const image = raw.images
+    ?.filter((i) => i.ratio === "16_9" && i.url?.startsWith("https://"))
+    .sort((a, b) => Math.abs((a.width ?? 0) - 640) - Math.abs((b.width ?? 0) - 640))[0];
+  return image?.url ?? null;
+}
+
+/** A `plans` row as saved, without the columns the database fills in. */
+export type PlanSnapshot = {
+  tm_event_id: string;
+  name: string;
+  starts_at: string;
+  ends_at: string | null;
+  venue_name: string;
+  venue_address: string | null;
+  venue_lat: number | null;
+  venue_lng: number | null;
+  ticket_url: string;
+  image_url: string | null;
+  price_min: number | null;
+  price_max: number | null;
+};
+
+// The copy of an event kept with a saved plan, built from Ticketmaster's own
+// record. Null when it's missing something a plan needs: a start time, a venue
+// name or an https ticket link.
+export function planSnapshot(raw: TmEvent): PlanSnapshot | null {
+  const venue = raw._embedded?.venues?.[0];
+  const startsAt = raw.dates?.start?.dateTime;
+  if (!startsAt || !venue?.name || !raw.url?.startsWith("https://")) return null;
+
+  const endsAt = raw.dates?.end?.dateTime;
+  const lat = Number(venue.location?.latitude);
+  const lng = Number(venue.location?.longitude);
+  const hasLocation = Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
+  const address = [venue.address?.line1, venue.city?.name, venue.state?.stateCode].filter(Boolean).join(", ");
+  const price = usdPrice(raw);
+  return {
+    tm_event_id: raw.id,
+    name: raw.name,
+    starts_at: startsAt,
+    ends_at: endsAt && Date.parse(endsAt) > Date.parse(startsAt) ? endsAt : null,
+    venue_name: venue.name,
+    venue_address: address || null,
+    venue_lat: hasLocation ? lat : null,
+    venue_lng: hasLocation ? lng : null,
+    ticket_url: raw.url,
+    image_url: pickImage(raw),
+    price_min: price?.min ?? null,
+    price_max: price?.max ?? null,
   };
 }
 

@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
-import { findEvents, getMyPreferences, isInChicagoArea } from "@/lib/discover";
+import { findEvents, getMyPreferences, isInChicagoArea, searchWindow } from "@/lib/discover";
+import { filterForPreferences } from "@/lib/events";
 import type { Preferences } from "@/lib/preferences";
 
 // Events on the signed-in person's free nights over the next two weeks, near
@@ -25,7 +26,9 @@ export async function GET() {
   }
 
   try {
-    return Response.json(await findEvents(prefs, new Date()));
+    const now = new Date();
+    const nearby = await findEvents(prefs, prefs.max_distance_miles, now);
+    return Response.json({ ...searchWindow(now), events: filterForPreferences(nearby, prefs, now) });
   } catch (err) {
     console.error("Ticketmaster search failed", err);
     return Response.json(

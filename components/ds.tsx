@@ -91,6 +91,18 @@ export function ChoiceChip({
   );
 }
 
+/** A labeled group of choice chips. */
+export function ChoiceGroup({ legend, hint, children }: { legend: string; hint?: string; children: ReactNode }) {
+  return (
+    // A legend can't be a flex item, so spacing here uses margins.
+    <fieldset>
+      <legend className="ds-label mb-3 text-(--ds-text)">{legend}</legend>
+      {hint && <p className="ds-small -mt-1.5 mb-3 text-(--ds-muted)">{hint}</p>}
+      <div className="flex flex-wrap gap-2">{children}</div>
+    </fieldset>
+  );
+}
+
 export function Badge({ tone = "highlight", children }: { tone?: "highlight" | "neutral"; children: ReactNode }) {
   return (
     <span

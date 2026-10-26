@@ -1,6 +1,6 @@
 "use client";
-import { useActionState, type ReactNode } from "react";
-import { buttonClass, ChoiceChip, TextLink } from "@/components/ds";
+import { useActionState } from "react";
+import { buttonClass, ChoiceChip, ChoiceGroup, TextLink } from "@/components/ds";
 import {
   BUDGETS,
   DISTANCES,
@@ -20,15 +20,15 @@ export function PreferencesForm({ initial, isNew }: { initial: Preferences; isNe
 
   return (
     <form action={formAction} className="flex flex-col gap-8">
-      <Choices legend="Home base">
+      <ChoiceGroup legend="Home base">
         {NEIGHBORHOODS.map((n) => (
           <ChoiceChip key={n.key} type="radio" name="home" value={n.key} defaultChecked={n.key === home}>
             {n.name}
           </ChoiceChip>
         ))}
-      </Choices>
+      </ChoiceGroup>
 
-      <Choices legend="How far you'll go">
+      <ChoiceGroup legend="How far you'll go">
         {DISTANCES.map((miles) => (
           <ChoiceChip
             key={miles}
@@ -40,9 +40,9 @@ export function PreferencesForm({ initial, isNew }: { initial: Preferences; isNe
             {miles} mi
           </ChoiceChip>
         ))}
-      </Choices>
+      </ChoiceGroup>
 
-      <Choices legend="Budget for two">
+      <ChoiceGroup legend="Budget for two">
         {BUDGETS.map((dollars) => (
           <ChoiceChip
             key={dollars}
@@ -54,9 +54,9 @@ export function PreferencesForm({ initial, isNew }: { initial: Preferences; isNe
             Up to ${dollars}
           </ChoiceChip>
         ))}
-      </Choices>
+      </ChoiceGroup>
 
-      <Choices legend="Free nights" hint="Every week. Pick at least one.">
+      <ChoiceGroup legend="Free nights" hint="Every week. Pick at least one.">
         {NIGHTS.map((night) => (
           <ChoiceChip
             key={night.value}
@@ -69,9 +69,9 @@ export function PreferencesForm({ initial, isNew }: { initial: Preferences; isNe
             <span className="sr-only">{night.name}</span>
           </ChoiceChip>
         ))}
-      </Choices>
+      </ChoiceGroup>
 
-      <Choices legend="Vibes" hint="Pick any that sound good, or none for every kind of event.">
+      <ChoiceGroup legend="Vibes" hint="Pick any that sound good, or none for every kind of event.">
         {VIBES.map((vibe) => (
           <ChoiceChip
             key={vibe.key}
@@ -83,7 +83,7 @@ export function PreferencesForm({ initial, isNew }: { initial: Preferences; isNe
             {vibe.name}
           </ChoiceChip>
         ))}
-      </Choices>
+      </ChoiceGroup>
 
       <div className="flex flex-col gap-4 border-t border-(--ds-border) pt-6">
         {state?.error && (
@@ -114,16 +114,5 @@ export function PreferencesForm({ initial, isNew }: { initial: Preferences; isNe
         )}
       </div>
     </form>
-  );
-}
-
-function Choices({ legend, hint, children }: { legend: string; hint?: string; children: ReactNode }) {
-  return (
-    // A legend can't be a flex item, so spacing here uses margins.
-    <fieldset>
-      <legend className="ds-label mb-3 text-(--ds-text)">{legend}</legend>
-      {hint && <p className="ds-small -mt-1.5 mb-3 text-(--ds-muted)">{hint}</p>}
-      <div className="flex flex-wrap gap-2">{children}</div>
-    </fieldset>
   );
 }
