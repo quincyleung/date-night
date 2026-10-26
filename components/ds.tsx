@@ -38,7 +38,7 @@ export function ButtonLink({
   );
 }
 
-const linkTones = {
+export const linkTones = {
   default:
     "text-(--ds-text) underline decoration-(--ds-indicator) decoration-1 underline-offset-4 ds-hover:decoration-2 ds-pressed:text-(--ds-muted)",
   /** Quiet, for secondary navigation. */

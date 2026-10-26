@@ -189,7 +189,10 @@ async function TicketmasterDown() {
       {plans.length > 0 && (
         <section className="flex flex-col gap-4 border-t border-(--ds-border) pt-6">
           <h2 className="ds-title text-(--ds-text)">Your saved events</h2>
-          <p className="ds-small text-(--ds-muted)">These are kept with your account, so they&apos;re here either way.</p>
+          <p className="ds-small text-(--ds-muted)">
+            These are kept with your account, so they&apos;re here either way.{" "}
+            <TextLink href="/plans">See all your plans</TextLink>
+          </p>
           <ul className="grid gap-4 sm:grid-cols-2">
             {plans.map((plan) => (
               <li key={plan.id} className={`${cardClass} flex flex-col gap-2 p-5`}>

@@ -221,3 +221,18 @@
 - **Pushed back:** None.
 - **Caught:** Thursday events on a Friday-and-Saturday search.
 - **Still open:** two Ticketmaster "HTTP 400" errors in the dev log from before the tests, not reproduced; the log will now say why if it happens again.
+
+## Step 16: Plans: Saved, Planned, Went (2026-10-26, branch `features`)
+
+- **Asked:** `/plans` with tabs for Saved, Planned and Went. A plan's detail shows the cost split for two, an "Add to Google Calendar" link (prefilled `calendar.google.com/calendar/render?action=TEMPLATE…`, no API) and an .ics download, and after the date a rating and note. Everything saved in Supabase. Commit. Check persistence: save a plan, sign out, sign in on a phone, and it's still there.
+- **Made:**
+  - **Flagged before building:** AGENTS.md said "Google Calendar link only, with no .ics file". The user chose to add the .ics and update the rule; AGENTS.md now allows both.
+  - `/plans`: three tabs with counts (links with `aria-current`, so Back and sharing work). Cards show the date, venue, and the cost for two or "Price unknown"; past events not yet rated get a "Rate it" badge; Went shows the stars, newest first. Each tab has its own empty state.
+  - `/plans/[id]`: status, date, venue and address; **Cost for two** (total for two and each person's share, as a range when tickets vary, compared with the saved budget; a clear note when Ticketmaster lists no price); **Add to Google Calendar** and **Download .ics** before the night; **Make this our plan** for saved events (the current plan goes back to Saved, since the database allows one) and **Move back to Saved**; after the start time, **How was it?** with 1–5 stars and a note up to 1,000 characters, which moves the plan to Went and can be updated.
+  - `/plans/[id]/calendar`: the .ics file, a Route Handler that checks `auth()` and reads the plan through row-level security. RFC 5545 escaping, 75-byte line folding, CRLF, UTC times; two hours long when Ticketmaster lists no end time.
+  - Server Functions re-read the plan through RLS and check dates against the saved copy, never the browser: a plan can only be made for a future event, and only rated after it starts.
+  - Header: Discover · Plans · Sign out (Sign out is now a text control so all three fit on a phone). Discover's down state links to Plans.
+  - **Tested** in headless Chrome with a new Clerk test user (deleted afterward with its rows), plus one past-dated test plan added directly in the database to try rating: tabs and counts; detail and cost split; the Google link and the .ics response (`text/calendar`, named after the event); making a plan, then making another (the first went back to Saved); rating 4 stars with a note moved it to Went; signing out sent `/plans` to sign-in.
+  - **Persistence:** a second, separate browser (own profile, no shared cookies) emulating an iPhone screen, user agent and touch: before sign-in `/plans` went to sign-in; after signing in it showed the same 1 Saved, 1 Planned, 1 Went with ★★★★, and the detail fit the screen. The rows in Supabase matched. Not a physical phone.
+- **Pushed back:** None.
+- **Caught:** The .ics request conflicted with the AGENTS.md rule; the user chose to change the rule.

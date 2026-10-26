@@ -16,7 +16,7 @@ A Chicago date-night and outing planner. The user picks a vibe, distance and bud
 
 - Events with no price are still shown, labeled "price unknown".
 - Family events are never hidden. They appear under whichever vibes they match.
-- The add-to-calendar link is a Google Calendar link only, with no `.ics` file.
+- Add to calendar offers a Google Calendar link (a prefilled `calendar.google.com/calendar/render?action=TEMPLATE…` page, no API) and an `.ics` download for other calendar apps.
 
 ## Stack
 

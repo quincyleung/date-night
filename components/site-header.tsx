@@ -6,7 +6,7 @@ import {
 } from "@clerk/nextjs";
 import Link from "next/link";
 import { Suspense } from "react";
-import { buttonClass, focusRing, TextLink } from "@/components/ds";
+import { buttonClass, focusRing, linkTones, TextLink } from "@/components/ds";
 
 export function SiteHeader() {
   return (
@@ -27,12 +27,13 @@ export function SiteHeader() {
               </SignUpButton>
             </Show>
             <Show when="signed-in">
-              <span className="ds-control">
+              <span className="ds-control flex items-center gap-4 sm:gap-6">
                 <TextLink href="/discover">Discover</TextLink>
+                <TextLink href="/plans">Plans</TextLink>
+                <SignOutButton redirectUrl="/">
+                  <button className={`min-h-11 cursor-pointer uppercase ${linkTones.subtle} ${focusRing}`}>Sign out</button>
+                </SignOutButton>
               </span>
-              <SignOutButton redirectUrl="/">
-                <button className={buttonClass("secondary", true)}>Sign out</button>
-              </SignOutButton>
             </Show>
           </Suspense>
         </nav>
