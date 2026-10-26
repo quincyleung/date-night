@@ -31,6 +31,7 @@ A Chicago date-night and outing planner. The user picks a vibe, distance and bud
 - Keys live only in `.env.local` and Vercel env vars, never in code or commits.
 - Ticketmaster is called only from the server.
 - Every table holding user data has `user_id` and row-level security.
+- Check sign-in at every layer. `proxy.ts` (Next 16's middleware) redirects signed-out visitors, but every page that loads user data, every Route Handler and every Server Function must also check `await auth()` itself and refuse if there's no user. Supabase row-level security is the final backstop.
 - Ask before adding any package.
 - Work on branches for big changes.
 

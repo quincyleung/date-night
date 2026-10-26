@@ -128,3 +128,12 @@
 - **Still to do (user):** Activate the Supabase integration in Clerk and add Clerk under Third-Party Auth in Supabase. Until then, signed-in queries won't work. Confirm `.env.local` uses `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
 - **Pushed back:** Kept all seven MCP features (Supabase's default command) instead of the four I recommended.
 - **Caught:** None.
+
+## Step 9: AGENTS.md cleanup and a sign-in rule (2026-10-26, branch `auth`)
+
+- **Asked:** Explain `agentFeedback`, turn it off and remove its section so AGENTS.md stays short and about this app. Add a rule: the proxy redirects signed-out visitors, but every page that loads user data and every Server Function must also check `auth()` and refuse without a user, with row-level security as the final backstop. Commit both.
+- **Made:**
+  - Removed `experimental.agentFeedback` from `next.config.ts` (it defaults to off). Checked Next's source: with it off, `next dev` deletes the section instead of restoring it. Removed the section, which had never been committed. Confirmed it stayed gone after the user's dev server restarted with the new config.
+  - Added the rule under "Rules" in AGENTS.md. It also names Route Handlers, which can be reached the same way.
+- **Pushed back:** None.
+- **Caught:** None.
