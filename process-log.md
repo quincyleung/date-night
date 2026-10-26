@@ -148,3 +148,21 @@
   - Merged `auth` into `main` (fast-forward, no conflicts) and pushed.
 - **Pushed back:** None.
 - **Caught:** The 15-character password minimum, which I hadn't mentioned when giving test instructions.
+
+## Step 11: Ticketmaster events route (2026-10-26, branch `features`)
+
+- **Asked:** A server-side route that calls Ticketmaster with the user's filters: Chicago, the free nights' date range, latlong and radius from the home base, and categories mapped from the vibes. Apply the budget for two on the server, keep events with no listed price and mark them, cache briefly for the rate limit (5 a second, 5,000 a day), never expose the key, and return a small shape. Commit.
+- **Made:**
+  - `app/api/events/route.ts`: checks `auth()` (per the new rule), loads the person's preferences through RLS, searches their free nights in the next 14 days, filters, and returns `{ from, to, events }`. Signed out: 401. No preferences: 404. Home base more than 50 miles from downtown: 422.
+  - `lib/events.ts` (no network): Chicago dates, including the Nov 1 clock change; merges consecutive free nights into one search each; builds the Ticketmaster query; turns each event into a ~0.5 KB summary (from ~9 KB) with distance, price for two or `priceUnknown: true`, ticket link, image and vibes. Drops cancelled and past-sale events and non-show listings.
+  - `lib/vibes.ts`: the AGENTS.md vibe rules in code. Name words match whole words, so "Ravenswood" isn't a rave and "Operation" isn't opera.
+  - `lib/ticketmaster.ts` (server only): the only place the key is read. Searches are cached for 5 minutes (`use cache`), pages are fetched one at a time at most 4 a second, and errors never include the URL, which holds the key.
+  - Checked: types, lint and build pass; offline tests on the 1,000 Chicago events saved in step 4 all pass; signed-out requests are redirected; no browser file mentions the key or Ticketmaster.
+- **Flagged:**
+  - Vibes aren't sent to Ticketmaster as category filters. The agreed rules also match on name words, start times and "21+" notes, which Ticketmaster can't filter, so a category filter would drop events like Second City. The vibe mapping runs on the server over every event in range.
+  - "Chicago" is the home base and radius, not Ticketmaster's city or market filter: the city filter drops suburbs inside the radius, and the market tag is missing on about 25% of Chicago venues.
+  - Only about 8% of events list a price, so most results will say "price unknown" and the budget filter rarely removes anything.
+  - The cache lives in server memory. On Vercel's serverless hosting it may not be shared between instances; switching to `use cache: remote` is a one-word change if needed after deploying.
+  - Not yet run against live Ticketmaster or with a real signed-in user: that needs the key loaded and a preferences row.
+- **Pushed back:** None.
+- **Caught:** None.
