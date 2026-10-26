@@ -25,7 +25,8 @@ export async function getMyPreferences(): Promise<Preferences | null> {
     .from("preferences")
     .select("home_label, home_lat, home_lng, max_distance_miles, budget_for_two, free_nights, vibes")
     .maybeSingle();
-  if (error) throw new Error(`Loading preferences failed: ${error.message}`);
+  // details holds the underlying cause, such as a DNS or connection error.
+  if (error) throw new Error(`Loading preferences failed: ${error.message}`, { cause: error });
   return data;
 }
 
