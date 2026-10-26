@@ -236,3 +236,4 @@
   - **Persistence:** a second, separate browser (own profile, no shared cookies) emulating an iPhone screen, user agent and touch: before sign-in `/plans` went to sign-in; after signing in it showed the same 1 Saved, 1 Planned, 1 Went with ★★★★, and the detail fit the screen. The rows in Supabase matched. Not a physical phone.
 - **Pushed back:** None.
 - **Caught:** The .ics request conflicted with the AGENTS.md rule; the user chose to change the rule.
+- **Follow-up (same step):** Plans cards now say "From $X for two" when tickets vary, matching Discover.

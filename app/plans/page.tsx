@@ -133,7 +133,10 @@ function PlanCard({ plan, happened }: { plan: Plan; happened: boolean }) {
           ) : (
             <>
               {plan.price_min !== null ? (
-                <p className="ds-body text-(--ds-text)">${formatMoney(plan.price_min * 2)} for two</p>
+                <p className="ds-body text-(--ds-text)">
+                  {plan.price_max !== null && plan.price_max > plan.price_min ? "From " : ""}$
+                  {formatMoney(plan.price_min * 2)} for two
+                </p>
               ) : (
                 <Badge tone="neutral">Price unknown</Badge>
               )}
