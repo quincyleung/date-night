@@ -50,7 +50,12 @@ export async function searchEvents(
 
     for (const raw of body._embedded?.events ?? []) {
       const event = summarizeEvent(raw, center);
-      if (event && event.venue.distanceMiles <= radiusMiles) events.push(event);
+      if (!event || event.venue.distanceMiles > radiusMiles) continue;
+      // Ticketmaster also returns events that started earlier and are still
+      // running, like a Thursday show ending after midnight or a months-long
+      // exhibit. Keep only events that start on the dates asked for.
+      if (event.localDate < range.start || event.localDate > range.end) continue;
+      events.push(event);
     }
     const totalPages = body.page?.totalPages ?? 0;
     if (page + 1 >= totalPages) break;
