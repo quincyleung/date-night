@@ -137,3 +137,14 @@
   - Added the rule under "Rules" in AGENTS.md. It also names Route Handlers, which can be reached the same way.
 - **Pushed back:** None.
 - **Caught:** None.
+
+## Step 10: Signed-in check and merge (2026-10-26)
+
+- **Asked:** Is the auth branch ready to merge? Then the user tested signing in.
+- **Made:**
+  - Recommended merging after one signed-in check: lint, build and signed-out protection were already verified, nothing used the Supabase client yet, the 4 commits held no keys (the GitHub repo is public), and Vercel wasn't deploying from GitHub yet.
+  - Answered sign-up questions. Read the Clerk app's settings with the Clerk CLI: passwords need 15+ characters, breached passwords are rejected, and an email code verifies sign-up. Recommended keeping the 15-character minimum, which matches current NIST guidance. Google sign-in is on, using Clerk's shared development credentials.
+  - The user signed in with Google: the header showed Sign out, protected pages let them through, and signing out returned to the landing page.
+  - Merged `auth` into `main` (fast-forward, no conflicts) and pushed.
+- **Pushed back:** None.
+- **Caught:** The 15-character password minimum, which I hadn't mentioned when giving test instructions.
