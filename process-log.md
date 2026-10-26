@@ -166,3 +166,10 @@
   - Not yet run against live Ticketmaster or with a real signed-in user: that needs the key loaded and a preferences row.
 - **Pushed back:** None.
 - **Caught:** None.
+
+## Step 12: Request flow diagram (2026-10-26, branch `features`)
+
+- **Asked:** A diagram of one request, from the click to the screen, through the browser, the server, Clerk, Supabase and the Ticketmaster API.
+- **Made:** `docs/request-flow.md`: a Mermaid sequence diagram of `GET /api/events` (session check in `proxy.ts`, `auth()`, the preferences read through RLS with the Clerk token, cached Ticketmaster searches per date range, filtering, JSON back), the signed-out redirect, and a table of what each party holds and never sees. Also drew a text version in the chat.
+- **Pushed back:** None.
+- **Caught:** None.
