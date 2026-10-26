@@ -1,26 +1,135 @@
 @import "tailwindcss";
 
+/*
+ * Parisian Morning, the design system from the recipe-book project
+ * (app/_ds/themes.ts there): ivory, gilt and marble. Square corners and
+ * hairlines; cards get a gold double frame instead of a shadow.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --ds-bg: #f8f3e8;
+  --ds-surface: #fffdf9;
+  --ds-text: #2b2420;
+  --ds-muted: #6e6253;
+  /* Decorative dividers only; controls use --ds-control. */
+  --ds-border: #e2d7c3;
+  --ds-control: #9c8a70;
+  /* Reserved for the primary action. */
+  --ds-accent: #8a6a2e;
+  --ds-accent-hover: #74581f;
+  --ds-accent-pressed: #5e4718;
+  --ds-on-accent: #fffdf9;
+  /* Selected chips and toggles. */
+  --ds-selected: #2b2420;
+  --ds-on-selected: #f8f3e8;
+  --ds-selected-border: #2b2420;
+  --ds-card-border: #e2d7c3;
+  --ds-soft: #f3ebdb;
+  --ds-soft-pressed: #e9ddc6;
+  --ds-badge: #f4dcdf;
+  --ds-on-badge: #7a3440;
+  --ds-error: #a1261b;
+  --ds-focus: #8a6a2e;
+  /* Link underlines. */
+  --ds-indicator: #b08d4c;
+  --ds-disabled-bg: #eee8dc;
+  --ds-disabled-text: #a39a8c;
+
+  --ds-card-frame: inset 0 0 0 6px #fffdf9, inset 0 0 0 7px #d9c49a;
+  /* Stands in for an event photo. */
+  --ds-art: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20200%20200%22%20preserveAspectRatio%3D%22none%22%3E%3Cfilter%20id%3D%22m%22%3E%3CfeTurbulence%20type%3D%22turbulence%22%20baseFrequency%3D%220.006%200.018%22%20numOctaves%3D%225%22%20seed%3D%227%22%2F%3E%3CfeColorMatrix%20values%3D%220%200%200%200%200.55%200%200%200%200%200.53%200%200%200%200%200.5%20-2.6%200%200%200%200.9%22%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%22200%22%20height%3D%22200%22%20fill%3D%22%23F4F1EC%22%2F%3E%3Crect%20width%3D%22200%22%20height%3D%22200%22%20filter%3D%22url(%23m)%22%2F%3E%3C%2Fsvg%3E")
+    center / cover no-repeat, #f4f1ec;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-serif: var(--nf-cormorant);
+  --font-sans: var(--nf-jost);
+  --font-script: var(--nf-pinyon);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--ds-bg);
+  color: var(--ds-text);
+}
+
+/* Interaction states. Hover only on devices that can hover. */
+@custom-variant ds-hover {
+  @media (hover: hover) {
+    &:hover:not(:disabled) {
+      @slot;
+    }
+  }
+}
+
+@custom-variant ds-focus {
+  &:focus-visible {
+    @slot;
+  }
+}
+
+@custom-variant ds-pressed {
+  &:active:not(:disabled) {
+    @slot;
+  }
+}
+
+/* Type roles. */
+@utility ds-display {
+  font-family: var(--nf-cormorant);
+  font-size: clamp(2.75rem, 6vw, 3.75rem);
+  font-weight: 500;
+  font-style: italic;
+  line-height: 1.05;
+}
+
+@utility ds-heading {
+  font-family: var(--nf-cormorant);
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+@utility ds-title {
+  font-family: var(--nf-cormorant);
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+@utility ds-body {
+  font-family: var(--nf-jost);
+  font-size: 1.0625rem;
+  font-weight: 400;
+  line-height: 1.65;
+}
+
+@utility ds-small {
+  font-family: var(--nf-jost);
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+@utility ds-label {
+  font-family: var(--nf-jost);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.4;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+
+@utility ds-control {
+  font-family: var(--nf-jost);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+/* Pinyon Script, once per page as a flourish. */
+@utility ds-script {
+  font-family: var(--nf-pinyon);
+  font-weight: 400;
+  line-height: 1;
 }

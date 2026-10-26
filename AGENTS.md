@@ -26,6 +26,15 @@ A Chicago date-night and outing planner. The user picks a vibe, distance and bud
 - Ticketmaster Discovery API
 - Hosted on Vercel Hobby
 
+## Design
+
+Parisian Morning, from the recipe-book project: ivory, espresso and gilt; Cormorant Garamond, Jost, and Pinyon Script once per page (the header wordmark).
+
+- Colors, type roles and interaction states are `--ds-*` variables and `ds-*` utilities in `app/globals.css`. Shared pieces (buttons, links, choice chips, badges, cards, empty state, spinner) are in `components/ds.tsx`. Use these, not raw colors or new one-off styles.
+- The gold accent is only for a screen's one primary action. Selected choices use espresso.
+- Square corners and hairlines, no shadows on controls; cards get the gold double frame.
+- Mobile first, tap targets at least 44px, WCAG AA contrast.
+
 ## Rules
 
 - Keys live only in `.env.local` and Vercel env vars, never in code or commits.
