@@ -173,3 +173,18 @@
 - **Made:** `docs/request-flow.md`: a Mermaid sequence diagram of `GET /api/events` (session check in `proxy.ts`, `auth()`, the preferences read through RLS with the Clerk token, cached Ticketmaster searches per date range, filtering, JSON back), the signed-out redirect, and a table of what each party holds and never sees. Also drew a text version in the chat.
 - **Pushed back:** None.
 - **Caught:** None.
+
+## Step 13: Parisian Morning design, first visit and Discover (2026-10-26, branch `features`)
+
+- **Asked:** First make everything follow the Parisian Morning design system from the recipe-book project. Then build the first visit for a new signed-in user: one short screen for home base (a few Chicago neighborhoods with preset coordinates), max distance, budget for two, free nights and vibes, with sensible defaults so they can skip it. Save to preferences, land on Discover with real results right away. Commit.
+- **Made:**
+  - **Design system.** Read the recipe-book theme and components and ported Parisian Morning: its colors, type roles and hover/focus/pressed states in `app/globals.css`; buttons, links, choice chips, badges, cards, empty state and spinner in `components/ds.tsx`. Restyled the layout (Cormorant Garamond, Jost, Pinyon Script), header, landing page and Clerk's sign-in forms. Removed the starter's Geist fonts and dark mode. Added a short Design section to AGENTS.md.
+  - **`/welcome`**: five groups of chips (8 neighborhoods; 2, 5, 10 or 25 miles; up to $50, $100, $200 or $400 for two; Mon–Sun; the 9 vibes, none meaning any). Defaults: The Loop, 10 miles, $200, Friday and Saturday, any vibe. "Show me events" saves; "Skip for now" saves the defaults. The chips are real radio buttons and checkboxes, so the form works without JavaScript. On an error the picks stay. Later visits load the saved choices and show Cancel instead of Skip.
+  - **Saving** (`app/welcome/actions.ts`): a Server Function that checks `auth()`, checks every value against the allowed choices on the server, and upserts the row through RLS. The database fills in `user_id` from the session token.
+  - **`/discover`**: no preferences yet → sent to `/welcome`. Otherwise it shows the next two weeks of free nights grouped by date, with a summary line ("Fri & Sat · within 10 mi of The Loop · up to $200 for two · any vibe") and a Change link. Each card: image (or a marble placeholder), time and distance, name, venue, vibes, price for two or "Price unknown", and a Tickets link. Empty and error states included. No save buttons yet; the shortlist is a later step.
+  - Sign-up now lands on `/welcome`; sign-in still lands on `/discover`, which forwards anyone without preferences.
+  - Moved loading preferences and finding events into `lib/discover.ts`, so the page and `/api/events` share them.
+  - Checked: types, lint and build pass; the new CSS classes are generated; signed-out visits to `/welcome` and `/discover` redirect to sign-in; offline tests of the form parsing (valid, no nights, tampered values) pass.
+- **Not yet checked:** a real signed-in save and live Discover results. That's the user's test, and it also confirms the Clerk ↔ Supabase connection.
+- **Pushed back:** None.
+- **Caught:** None.

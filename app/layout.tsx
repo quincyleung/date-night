@@ -53,7 +53,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           signInUrl="/sign-in"
           signUpUrl="/sign-up"
           signInFallbackRedirectUrl="/discover"
-          signUpFallbackRedirectUrl="/discover"
+          signUpFallbackRedirectUrl="/welcome"
           appearance={clerkAppearance}
         >
           <SiteHeader />
