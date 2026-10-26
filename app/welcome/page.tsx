@@ -57,7 +57,9 @@ async function Welcome() {
         )}
       </header>
       <div className={`${cardClass} p-6 sm:p-8`}>
-        <PreferencesForm initial={saved ?? DEFAULT_PREFERENCES} isNew={!saved} />
+        {/* Next keeps visited pages mounted, inputs included. The key starts a
+            fresh form when the saved choices change, so it never shows old ones. */}
+        <PreferencesForm key={JSON.stringify(saved)} initial={saved ?? DEFAULT_PREFERENCES} isNew={!saved} />
       </div>
     </div>
   );

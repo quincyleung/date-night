@@ -185,6 +185,20 @@
   - Sign-up now lands on `/welcome`; sign-in still lands on `/discover`, which forwards anyone without preferences.
   - Moved loading preferences and finding events into `lib/discover.ts`, so the page and `/api/events` share them.
   - Checked: types, lint and build pass; the new CSS classes are generated; signed-out visits to `/welcome` and `/discover` redirect to sign-in; offline tests of the form parsing (valid, no nights, tampered values) pass.
-- **Not yet checked:** a real signed-in save and live Discover results. That's the user's test, and it also confirms the Clerk ↔ Supabase connection.
 - **Pushed back:** None.
-- **Caught:** None.
+- **Caught:**
+  - Everything was black and white. The user's running `next dev` had kept compiling the old starter `globals.css`, so none of the color variables existed. The production build had been correct. Touching the file got the dev server to pick it up; the user's tab needed a hard reload.
+  - "I can't click anything and the discover page doesn't work." Both came from one cause, below.
+
+## Step 14: Testing the signed-in flow (2026-10-26, branch `features`)
+
+- **Asked:** Test the site, since clicks and Discover didn't work; then push.
+- **Made:**
+  - Drove headless Chrome through its debugging protocol from a small Node script (no new packages). Signed out, the landing page and Sign in worked. The user chose to test with a new Clerk test user (a `+clerk_test` address, signed in with a one-time token), deleted afterward with its preferences row.
+  - **Found:** `/welcome` and `/discover` failed with "fetch failed". The server log only showed that line, so I read the full error the dev server replays into the browser: `getaddrinfo ENOTFOUND abcdefghijklmnop.supabase.co`. `NEXT_PUBLIC_SUPABASE_URL` in `.env.local` held Supabase's example placeholder. With the database unreachable, both pages showed only an error and a "Try again" button that led back to the same error, which looked like nothing could be clicked. The user fixed the line with a command I gave them (I don't read `.env.local`).
+  - Made the server log include the underlying cause (DNS, connection) when loading preferences fails. Pushed.
+  - **After the fix:** the first visit redirects to `/welcome` with the defaults; every chip responds to clicks; submitting with no nights shows the error and keeps the other picks; saving reaches Discover in about 3 seconds with 133 live events (97 "price unknown", all images loading, ticket links open Ticketmaster in a new tab); no sideways scrolling at phone width. The saved row in Supabase had the test user's Clerk ID filled in by the database, which confirms Clerk → Supabase → row-level security works.
+  - **Bug found and fixed:** after saving, "Change" on Discover showed the choices from before the save, and so did the Back button. Next 16 keeps up to 3 visited pages mounted (React's `<Activity>`) and brings them back on return. The fresh data did arrive, but React's reset of the form after the save had marked the old choice as set, so the inputs ignored the new defaults. Fixed in two parts, each checked by turning it off: the form is keyed on the saved choices so new values start a fresh form (fixes "Change"), and the save calls `refresh()` so the browser drops pages kept from before the save (fixes Back, which otherwise brought back the old choices and could quietly revert them on a second save).
+  - Other browser warning: a hydration mismatch on `<body>` came from the Grammarly extension, not the app.
+- **Pushed back:** None.
+- **Caught:** The placeholder Supabase URL was the user's to fix; the stale form after saving was found in testing.
