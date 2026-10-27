@@ -276,3 +276,20 @@
 - **Made:** The file, exactly as given.
 - **Pushed back:** None.
 - **Caught:** None.
+
+## Step 21: End-to-end test for data isolation (2026-10-27, branch `e2e-and-review`)
+
+- **Asked:** One Playwright test. Two throwaway Clerk users made through the Backend API with `CLERK_SECRET_KEY` from the environment, unique `+clerk_test` emails and random passwords, never printing the key or passwords. A and B each save a plan with a unique name; A sees only A's, B only B's. Cleanup even on failure: each user removes their own plans through the app while signed in (no service-role key), then both Clerk users are deleted. Helpers only in `tests/`. Ask before installing; don't run it yet.
+- **Decided with the user (asked first):**
+  - Installed `@playwright/test` 1.64.1 and `@clerk/testing` 2.2.51 as dev dependencies. Uses the installed Google Chrome, so no browser download. The install also moved `@clerk/backend` 3.26.2 → 3.26.3 and `@clerk/shared` 4.41.1 → 4.42.0, which the app uses; the production build still passes.
+  - Plans can't be named (Ticketmaster names them on the server), so each user saves a different Discover event whose name appears once in the results.
+  - Device trust is on in Clerk, so a password sign-in from a fresh browser needs an emailed code. Users are still created with random passwords, but sign in with `clerk.signIn({ emailAddress })`, a one-time token from the secret key.
+  - Each run leaves two preferences rows (the app can't delete them by design); nobody can read them.
+- **Made:**
+  - `playwright.config.ts`: loads `.env.local` (shell variables win), reuses the dev server on :3000 or starts one, one worker, Chrome, traces kept only on failure. `npm run test:e2e`. Playwright's output folders are ignored by git.
+  - `tests/helpers/clerk-users.ts`: creates and deletes users with `fetch`. Refuses keys that aren't `sk_test_`, only deletes `date-night-e2e-…+clerk_test` users, and error messages carry only Clerk's error code, never the request.
+  - `tests/helpers/app.ts`: sign in, skip Welcome, save an event with a unique name, list Saved plans, remove all saved plans through the plan page. Only counts visible elements, since Next keeps hidden copies of earlier pages.
+  - `tests/isolation.spec.ts`: a fixture makes each person in their own browser context and cleans up in teardown, which runs even when the test fails. Each person's Saved list must equal exactly their own plan, listed after both have saved. Each person can open their own plan and its .ics, but the other's plan link shows "not found" without their event's name, and the other's .ics returns 404.
+  - Types, lint and build pass. Not run, as asked.
+- **Pushed back:** None.
+- **Caught:** None.
