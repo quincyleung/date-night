@@ -367,3 +367,12 @@
   - The Playwright tests weren't rerun (they load `.env.local`, which needs the user's OK).
 - **Pushed back:** None.
 - **Caught:** None.
+
+## Step 26: Rerun the end-to-end tests after the fix (2026-10-27, branch `e2e-and-review`)
+
+- **Asked:** `npx playwright test`
+- **Result:** both tests passed in 58.2 s, including the production build: "each person sees only their own preferences and saved plans" (19.8 s) and "the database refuses changes to another person's rows" (7.6 s).
+- **Server log:** 0 "During prerendering, fetch() rejects…" errors, down from 79 in step 24's run. The harmless `[Clerk Testing] FAPI request failed … context or browser has been closed` line still appears once during cleanup.
+- **Cleanup checked afterward:** no `date-night-e2e` users left in Clerk, no plans left from the run, and four new preferences rows, as expected.
+- **Pushed back:** None.
+- **Caught:** None.
