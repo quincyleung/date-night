@@ -150,7 +150,6 @@ function CostSplit({ plan, budget }: { plan: Plan; budget: number | null }) {
         <dt className="ds-label self-center text-(--ds-muted)">Each of you</dt>
         <dd className="ds-title text-(--ds-text)">{range(min, max)}</dd>
       </dl>
-      {max > min && <p className="ds-small text-(--ds-muted)">Tickets range from cheapest to best seats.</p>}
       {budget !== null && (
         <p className="ds-small text-(--ds-muted)">
           {total <= budget

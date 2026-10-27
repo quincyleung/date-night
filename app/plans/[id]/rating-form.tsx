@@ -29,7 +29,6 @@ export function RatingForm({ id, rating, note }: { id: string; rating: number | 
           placeholder="What you'd tell a friend about it"
           className={`ds-body w-full border border-(--ds-control) bg-(--ds-surface) p-3 text-(--ds-text) placeholder:text-(--ds-muted) ${focusRing}`}
         />
-        <span className="ds-small text-(--ds-muted)">Up to 1,000 characters.</span>
       </label>
       {state.error && (
         <p role="alert" className="ds-small text-(--ds-error)">

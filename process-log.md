@@ -257,3 +257,15 @@
   - Merged `features` into `main` (fast-forward, no conflicts) and pushed both branches. `gh` isn't installed, so there's no pull request on GitHub, same as the `auth` merge.
 - **Pushed back:** None.
 - **Caught:** None.
+
+## Step 19: Style tweaks (2026-10-27, branch `features`)
+
+- **Asked:** Remove the box around "price unknown"; remove redundant text like "None picked means every kind of event."; How it works steps should be "Set your style, Browse events, Shortlist and plan, Rate it afterward".
+- **Made:**
+  - "Price unknown" is plain muted text where the price would be, on Discover and Plans cards (was a bordered badge).
+  - Removed hints that repeat what the screen shows: the Vibes hint on Discover and on Welcome ("…or none for every kind of event"), "Pick at least one" under Free nights (the form already says so if none are picked; "Every week." stays), "Tickets range from cheapest to best seats" under a price range, "Up to 1,000 characters" under the rating note (the box stops at 1,000), and "These are kept with your account…" in Discover's down state (the "See all your plans" link stays).
+  - How it works titles: Set your style, Browse events, Shortlist and plan, Rate it afterward. Step 3's text now says "add it to your calendar", since there's an .ics as well as Google.
+  - Checked in headless Chrome with a Clerk test user (deleted afterward with its rows): landing, Welcome, Discover and Plans screenshots; the price line has no border.
+  - My test script's "Skip for now" click twice left the page on Welcome. Timed it with a real click (Discover in 0.5 s) and with a tap before React loads (still saved and reached Discover), so it was the script clicking during the sign-in redirect, not a bug.
+- **Pushed back:** None.
+- **Caught:** None.

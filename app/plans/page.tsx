@@ -138,7 +138,7 @@ function PlanCard({ plan, happened }: { plan: Plan; happened: boolean }) {
                   {formatMoney(plan.price_min * 2)} for two
                 </p>
               ) : (
-                <Badge tone="neutral">Price unknown</Badge>
+                <p className="ds-body text-(--ds-muted)">Price unknown</p>
               )}
               {happened && <Badge>Rate it</Badge>}
             </>

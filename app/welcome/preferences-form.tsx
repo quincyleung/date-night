@@ -56,7 +56,7 @@ export function PreferencesForm({ initial, isNew }: { initial: Preferences; isNe
         ))}
       </ChoiceGroup>
 
-      <ChoiceGroup legend="Free nights" hint="Every week. Pick at least one.">
+      <ChoiceGroup legend="Free nights" hint="Every week.">
         {NIGHTS.map((night) => (
           <ChoiceChip
             key={night.value}
@@ -71,7 +71,7 @@ export function PreferencesForm({ initial, isNew }: { initial: Preferences; isNe
         ))}
       </ChoiceGroup>
 
-      <ChoiceGroup legend="Vibes" hint="Pick any that sound good, or none for every kind of event.">
+      <ChoiceGroup legend="Vibes">
         {VIBES.map((vibe) => (
           <ChoiceChip
             key={vibe.key}

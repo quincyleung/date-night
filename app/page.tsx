@@ -9,12 +9,12 @@ const steps = [
     body: "Pick your vibes, how far you'll travel from home, your budget for two, and the nights you're usually free.",
   },
   {
-    title: "Browse your free nights",
+    title: "Browse events",
     body: "See Chicago events on those nights that fit. Events without a listed price still show, marked “price unknown.”",
   },
   {
-    title: "Shortlist, then pick one",
-    body: "Save the ones you like, then choose the one you're going to. You'll see the cost for two and get a Google Calendar link.",
+    title: "Shortlist and plan",
+    body: "Save the ones you like, then choose the one you're going to. You'll see the cost for two and can add it to your calendar.",
   },
   {
     title: "Rate it afterward",

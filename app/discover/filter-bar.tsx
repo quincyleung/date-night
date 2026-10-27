@@ -16,7 +16,7 @@ export function FilterBar({ filters }: { filters: Filters }) {
       onChange={(e) => e.currentTarget.requestSubmit()}
       className={`${cardClass} flex flex-col gap-6 p-5 sm:p-6`}
     >
-      <ChoiceGroup legend="Vibes" hint="None picked means every kind of event.">
+      <ChoiceGroup legend="Vibes">
         {VIBES.map((vibe) => (
           <ChoiceChip
             key={vibe.key}

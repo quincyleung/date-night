@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { Badge, ButtonLink, cardClass, EmptyState, TextLink } from "@/components/ds";
+import { ButtonLink, cardClass, EmptyState, TextLink } from "@/components/ds";
 import { findEvents, getMyPreferences, isInChicagoArea, searchWindow } from "@/lib/discover";
 import type { EventSummary } from "@/lib/events";
 import { applyFilters, filtersHref, readFilters, suggestFixes, type Filters } from "@/lib/filters";
@@ -133,9 +133,7 @@ function EventCard({ event, saved }: { event: EventSummary; saved: boolean }) {
               {event.price.max > event.price.min ? "From " : ""}${formatMoney(event.price.forTwo)} for two
             </p>
           ) : (
-            <div>
-              <Badge tone="neutral">Price unknown</Badge>
-            </div>
+            <p className="ds-body text-(--ds-muted)">Price unknown</p>
           )}
           <div className="flex flex-wrap items-center justify-between gap-3">
             {event.startsAt ? (
@@ -190,7 +188,6 @@ async function TicketmasterDown() {
         <section className="flex flex-col gap-4 border-t border-(--ds-border) pt-6">
           <h2 className="ds-title text-(--ds-text)">Your saved events</h2>
           <p className="ds-small text-(--ds-muted)">
-            These are kept with your account, so they&apos;re here either way.{" "}
             <TextLink href="/plans">See all your plans</TextLink>
           </p>
           <ul className="grid gap-4 sm:grid-cols-2">
