@@ -402,3 +402,15 @@
 - **Still to do:** put "Read own plans" back; decide about the two kept test users.
 - **Pushed back:** None.
 - **Caught:** None.
+
+## Step 29: Restore the original read policy on plans (2026-10-27, branch `e2e-and-review`)
+
+- **Asked:** A migration that restores the original select policy. Show the SQL, then apply it.
+- **Made:** migration `restore_plans_read_own_policy` (version `20261027172002`), applied to Supabase. It drops "TEMPORARY read all plans" and recreates "Read own plans" (`for select to authenticated using ((select auth.jwt() ->> 'sub') = user_id)`), as in `20261026212811_create_preferences_and_plans.sql`.
+- **Checked:**
+  - the four plans policies in `pg_policies` match the snapshot taken before step 27 exactly;
+  - Supabase's security advisor reports no issues.
+- **Open from step 27:** neither temporary migration is in `supabase/migrations/`. The database's history lists both; together they change nothing.
+- **Still to do:** decide about the two test users kept in step 28.
+- **Pushed back:** None.
+- **Caught:** None.
