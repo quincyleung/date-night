@@ -414,3 +414,15 @@
 - **Still to do:** decide about the two test users kept in step 28.
 - **Pushed back:** None.
 - **Caught:** None.
+
+## Step 30: Rerun the end-to-end tests with the policy restored (2026-10-27, branch `e2e-and-review`)
+
+- **Asked:** `npx playwright test`
+- **Result:** both tests passed in 47.2 s, including the production build: "each person sees only their own preferences and saved plans" (16.8 s) and "the database refuses changes to another person's rows" (7.4 s). So with step 29's policy they pass, and with step 27's open one they failed (step 28).
+- **Server log:** 0 prerender errors. Three of the harmless `[Clerk Testing] FAPI request failed … closed` lines this time, all during cleanup.
+- **Cleanup checked afterward:**
+  - this run's four Clerk users are gone. Only the two kept in step 28 remain;
+  - `plans` holds only the owner's real plan, untouched;
+  - this run added four preferences rows, as every run does.
+- **Pushed back:** None.
+- **Caught:** None.
