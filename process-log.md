@@ -269,3 +269,10 @@
   - My test script's "Skip for now" click twice left the page on Welcome. Timed it with a real click (Discover in 0.5 s) and with a tap before React loads (still saved and reached Discover), so it was the script clicking during the sign-in redirect, not a bug.
 - **Pushed back:** None.
 - **Caught:** None.
+
+## Step 20: Test reviewer agent (2026-10-27, branch `features`)
+
+- **Asked:** Create `.claude/agents/test-reviewer.md` with the user's text: a read-only subagent (Read, Grep, Glob) that reviews Playwright tests for whether they would really fail if user isolation broke, and reports weaknesses by severity without editing files.
+- **Made:** The file, exactly as given.
+- **Pushed back:** None.
+- **Caught:** None.
