@@ -463,3 +463,14 @@
 - **Cleanup checked afterward:** this run's Clerk users are gone; only the two kept in step 28 remain. `plans` holds only the owner's real plan, untouched.
 - **Pushed back:** None.
 - **Caught:** None.
+
+## Step 34: Vercel's Clerk keys don't match local (2026-10-27, branch `e2e-and-review`)
+
+- **Asked:** why the Vercel environment variables differ from `.env.local`, when the user didn't add them; they appeared after connecting Clerk.
+- **Found** (read-only, `clerk apps list`; secret keys never printed):
+  - the Clerk account now has three applications. The newest, "date-night" (`app_3LIBLHGY1FlFgDyTM4pscr4FyMP`, sign-in domain `settling-terrapin-1849.clerk.accounts.dev`, key starting `pk_test_c2V0dGxp…`), was created around when Clerk was connected in Vercel, so the integration most likely created it and put its keys into Vercel;
+  - local development and the end-to-end tests use "Date Night" (`app_3LAEMxLdZADr8WqHpXIhM7OsryW`, `quick-walleye-3169.clerk.accounts.dev`, key starting `pk_test_cXVpY2st…`). That's the app Supabase trusts: the tests pass with its tokens.
+  - Deploying with the new keys would give the live site a separate, empty user list. Supabase would refuse its sign-in tokens, so signed-in pages couldn't load or save anything.
+- **Suggested:** set Vercel's two Clerk variables to the `.env.local` values, removing the Clerk integration from the Vercel project if it won't allow edits. Delete the unused "date-night" app only after nothing points at it.
+- **Pushed back:** None.
+- **Caught:** the user noticed Vercel's environment variables differed from local and that they hadn't added them.
