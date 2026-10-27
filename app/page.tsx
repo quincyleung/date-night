@@ -39,7 +39,7 @@ export default function Home() {
                 <button className={buttonClass("primary")}>Get started</button>
               </SignUpButton>
               <SignInButton>
-                <button className={buttonClass("secondary")}>I have an account</button>
+                <button className={buttonClass("secondary")}>Sign in</button>
               </SignInButton>
             </div>
           </Show>

@@ -494,3 +494,14 @@
 - **Noticed:** a plan saved at 20:31 UTC by another account (`user_3LIEBWaplP9jFPNdxsMamkvHfi8`), someone using the live site. Left untouched.
 - **Pushed back:** None.
 - **Caught:** None.
+
+## Step 36: One way in on the home page (2026-10-27, branch `e2e-and-review`)
+
+- **Asked:** remove the Sign in and Sign up buttons at the top, since they repeat the home page's Get started and I have an account, and rename "I have an account" to "Sign in", so it's Get started and Sign in.
+- **Made:**
+  - `components/site-header.tsx`: signed out, the header now shows only the Date Night wordmark. Signed in it's unchanged: Discover, Plans, Sign out;
+  - `app/page.tsx`: the home page's second button now says "Sign in".
+  - This also leaves the home page with one gold primary action (Get started); before, the header's Sign up was gold too.
+- **Checked:** types, lint and build pass.
+- **Pushed back:** None.
+- **Caught:** the user noticed the header's buttons duplicated the home page's.
