@@ -388,3 +388,17 @@
 - **Still to do:** put "Read own plans" back.
 - **Pushed back:** None.
 - **Caught:** None.
+
+## Step 28: Run the end-to-end tests with reading plans open (2026-10-27, branch `e2e-and-review`)
+
+- **Asked:** `npx playwright test`, with step 27's open read policy still in place.
+- **Result:** both tests failed, at their isolation checks, which is what they should do when isolation breaks:
+  - "each person sees only their own preferences and saved plans": "A sees only A's plan". A's Saved tab also listed a second plan, which the test hadn't saved as A.
+  - "the database refuses changes to another person's rows": "plans visible". A's REST read returned three plans instead of one: A's own, B's, and the owner's real plan (status `planned`, so it never shows on a Saved tab).
+- **Cleanup:** worked as designed (step 22, option B):
+  - each person removed only the plans the test saved as them, and every test plan is gone. The owner's real plan is untouched and the only row in `plans`;
+  - in each test, the first person cleaned up still saw the other person's plan, so their check refused to call it clean and kept their Clerk user. The second person's check came back clean, so that user was deleted;
+  - kept: `user_3LHqgg69P4tgLTLg0G9Mq5r5dAe` (test 1, A) and `user_3LHqjgLqKiG3RkZUWfD6nQ84zNP` (test 2, A). Neither has plans left.
+- **Still to do:** put "Read own plans" back; decide about the two kept test users.
+- **Pushed back:** None.
+- **Caught:** None.
