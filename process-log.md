@@ -474,3 +474,23 @@
 - **Suggested:** set Vercel's two Clerk variables to the `.env.local` values, removing the Clerk integration from the Vercel project if it won't allow edits. Delete the unused "date-night" app only after nothing points at it.
 - **Pushed back:** None.
 - **Caught:** the user noticed Vercel's environment variables differed from local and that they hadn't added them.
+
+## Step 35: Smoke test of the live site (2026-10-27, branch `e2e-and-review`)
+
+- **Asked:** the user deployed to Vercel, after fixing the Clerk keys, and shared https://date-night-flame.vercel.app/
+- **Checked:**
+  - **Clerk app:** the live page's public key decodes to `quick-walleye-3169`, the "Date Night" app, so the keys were fixed.
+  - **Signed out:** `/plans`, `/discover` and `/welcome` send a browser to Clerk's sign-in check (307). Non-browser requests get 404, and so does the `.ics` route.
+  - **Signed in, as a throwaway Clerk test user in "Date Night":**
+    - Skip, Discover with Ticketmaster events, and Save work;
+    - after a reload, Discover marks the saved event "✓ Saved";
+    - the Saved tab, the plan page and its `.ics` (200, `text/calendar`) work;
+    - a made-up plan ID shows "This page could not be found." and its `.ics` returns 404 "No such plan.";
+    - the cost for two is shown (a free event, $0 on Ticketmaster, so $0), and the Google Calendar link opens a prefilled `calendar.google.com/calendar/render?action=TEMPLATE…` page;
+    - Make this our plan, then the Planned tab, Move back to Saved and Remove from Saved all work;
+    - clicking between Discover, Plans, a plan, All plans and Welcome shows each page's data.
+  - Three first-pass misses were in my scripts, not the site: a text match expecting "Saved" at the start of "✓ Saved"; looking for "Total for two"; and link clicks run after the only plan had been removed. All three passed on a recheck.
+- **Cleanup:** the test user and their plan and preferences rows were deleted; the browser was stopped.
+- **Noticed:** a plan saved at 20:31 UTC by another account (`user_3LIEBWaplP9jFPNdxsMamkvHfi8`), someone using the live site. Left untouched.
+- **Pushed back:** None.
+- **Caught:** None.
