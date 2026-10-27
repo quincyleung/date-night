@@ -335,3 +335,18 @@
   - Types and lint pass. Not run.
 - **Pushed back:** None.
 - **Caught:** None.
+
+## Step 24: First run of the end-to-end tests (2026-10-27, branch `e2e-and-review`)
+
+- **Asked:** `npx playwright test`
+- **Result:** both tests passed in 57.5 s, including the production build: "each person sees only their own preferences and saved plans" (20.1 s) and "the database refuses changes to another person's rows" (8.2 s).
+- **Cleanup checked afterward:**
+  - no `date-night-e2e` users left in Clerk;
+  - no test plans left in Supabase (the only recent plan is the user's own, saved before the run, untouched);
+  - exactly four leftover preferences rows, as expected.
+- **Found in the server log (not fixed, not asked):**
+  - 79 "Loading preferences/plans failed: During prerendering, fetch() rejects when the prerender is complete" errors from `/discover`, `/welcome` and `/plans`. In production, links prefetch the destination's App Shell, which runs our `auth()` and then the Supabase call. Next leaves uncached work out of prefetches by cutting the fetch off when the prerender ends, and our `try/catch` logs that as an error. Pages work, and the tests pass. The dev server doesn't prefetch, so it never showed before.
+  - Next's guide suggests `await navigation()` (from `next/cache`) before uncached work, so it runs only on navigation. `unstable_rethrow` won't catch it, because supabase-js turns the rejection into its own error first.
+  - `[Clerk Testing] FAPI request failed … context or browser has been closed`: Clerk's helper tried to forward a request after cleanup closed the browser. Harmless; it printed a dev-browser token for the deleted test user, not the secret key or a password.
+- **Pushed back:** None.
+- **Caught:** None.
