@@ -318,3 +318,20 @@
 - **Pushed back:** None.
 - **Caught:** L2 conflicted with the original cleanup instruction; the user chose to keep the user when removal fails.
 - **Later:** H2 (write isolation through Supabase directly, limited to test rows) and M1 (A picks different preferences).
+
+## Step 23: Test write isolation (H2) and preferences isolation (M1) (2026-10-27, branch `e2e-and-review`)
+
+- **Asked:** Push, and test H2 and M1 (left for later in step 22).
+- **Made:**
+  - Pushed `e2e-and-review` first (the test and its review fixes).
+  - **M1, in the existing test:** A fills in the Welcome form (Lincoln Park, 25 mi, up to $400, Thursday and Saturday) while B keeps the defaults. After both have saved, each person's Discover header must say their own nights and home ("Thu & Sat from Lincoln Park." vs "Fri & Sat from The Loop.") and not the other's. The Welcome form must have their own home and distance chosen and not the other's home. The chips are tapped the way a person would (the label around a hidden input).
+  - **H2, a second test:** "the database refuses changes to another person's rows". Each person creates their own preferences and one plan for a made-up event directly through Supabase's REST API, using the public URL, the publishable key and their own Clerk session token, as anyone could. No Discover, so no Ticketmaster. Then, in both directions:
+    - reading returns only their own rows;
+    - changing or deleting the other's plan or preferences changes nothing, while the same request on their own row does change one row, so an empty result isn't a malformed request;
+    - planting a plan or preferences in the other's account, or moving their own plan to the other, is refused with Postgres error 42501.
+    - Afterwards each person's rows are exactly as made, and their Saved tab in the app shows exactly their own plan.
+  - `tests/helpers/supabase-rest.ts`: those requests, with a fresh Clerk token for each (they last about a minute). The token and key are never printed.
+  - Cleanup is unchanged: each person removes only the plans the test made, through the app. Each run now leaves four preferences rows (two per test), which the app can't delete by design.
+  - Types and lint pass. Not run.
+- **Pushed back:** None.
+- **Caught:** None.

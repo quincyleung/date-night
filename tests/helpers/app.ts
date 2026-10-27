@@ -1,7 +1,7 @@
 // Steps through the app as a signed-in person. Next keeps up to 3 visited pages
 // mounted but hidden (React <Activity>), so lookups only count visible elements.
 import { clerk } from "@clerk/testing/playwright";
-import { expect, type Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 import type { TestUser } from "./clerk-users";
 
 export type SavedPlan = { name: string; href: string };
@@ -21,6 +21,30 @@ export async function signIn(page: Page, user: TestUser) {
 export async function skipWelcome(page: Page) {
   await page.goto("/welcome");
   await page.getByRole("button", { name: "Skip for now" }).click();
+  await page.waitForURL(/\/discover$/);
+}
+
+const WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+export type PreferenceChoices = { home: string; distance: string; budget: string; nights: string[] };
+
+/** A new person's first visit, filling in the Welcome form instead of skipping it. */
+export async function choosePreferences(page: Page, choices: PreferenceChoices) {
+  await page.goto("/welcome");
+  // Each choice is a chip: a label around a visually hidden input. Tap the chip, as a person would.
+  const chip = (input: Locator) => page.locator("label").filter({ has: input });
+  for (const name of [choices.home, choices.distance, choices.budget]) {
+    const radio = page.getByRole("radio", { name, exact: true });
+    await chip(radio).click();
+    await expect(radio).toBeChecked();
+  }
+  for (const night of WEEKDAYS) {
+    const box = page.getByRole("checkbox", { name: night, exact: true });
+    const wanted = choices.nights.includes(night);
+    if ((await box.isChecked()) !== wanted) await chip(box).click();
+    await expect(box).toBeChecked({ checked: wanted });
+  }
+  await page.getByRole("button", { name: "Show me events" }).click();
   await page.waitForURL(/\/discover$/);
 }
 

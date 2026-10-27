@@ -1,8 +1,28 @@
 import { clerkSetup } from "@clerk/testing/playwright";
 import { test as base, expect, type BrowserContext } from "@playwright/test";
-import { removeTestPlans, saveUniqueEvent, savedPlans, signIn, skipWelcome, type Person, type SavedPlan } from "./helpers/app";
+import {
+  choosePreferences,
+  removeTestPlans,
+  saveUniqueEvent,
+  savedPlans,
+  signIn,
+  skipWelcome,
+  type Person,
+  type SavedPlan,
+} from "./helpers/app";
 import { createTestUser, deleteTestUser, type TestUser } from "./helpers/clerk-users";
+import {
+  expectNothingChanged,
+  expectRefused,
+  rowsOf,
+  supabaseAs,
+  testPlan,
+  testPreferences,
+} from "./helpers/supabase-rest";
 
+// Two tests of keeping each person's data to themselves: through the app's pages,
+// and straight against the database.
+//
 // newPerson makes a throwaway Clerk user signed in in their own browser context
 // (separate cookies). Teardown runs even when the test fails: each person
 // removes the plans the test saved as them, through the app while signed in,
@@ -64,12 +84,18 @@ test.beforeAll(async () => {
   await clerkSetup({ dotenv: false });
 });
 
-test("each person sees only their own saved plans", async ({ newPerson }) => {
+test("each person sees only their own preferences and saved plans", async ({ newPerson }) => {
   test.setTimeout(240_000);
   const a = await newPerson("a");
   const b = await newPerson("b");
 
-  await skipWelcome(a.page);
+  // A picks their own preferences and B keeps the defaults, so showing one the other's would be noticed.
+  await choosePreferences(a.page, {
+    home: "Lincoln Park",
+    distance: "25 mi",
+    budget: "Up to $400",
+    nights: ["Thursday", "Saturday"],
+  });
   const planA = await saveUniqueEvent(a, []);
   await skipWelcome(b.page);
   const planB = await saveUniqueEvent(b, [planA.name]);
@@ -79,6 +105,20 @@ test("each person sees only their own saved plans", async ({ newPerson }) => {
   // Listed after both have saved, so each list could include the other's plan.
   expect(await savedPlans(a.page), "A sees only A's plan").toEqual([planA]);
   expect(await savedPlans(b.page), "B sees only B's plan").toEqual([planB]);
+
+  // Each person's own preferences, on Discover's header and in the Welcome form, and not the other's.
+  for (const [me, mine, theirs] of [
+    [a, { home: "Lincoln Park", nights: "Thu & Sat", distance: "25 mi" }, { home: "The Loop", nights: "Fri & Sat" }],
+    [b, { home: "The Loop", nights: "Fri & Sat", distance: "10 mi" }, { home: "Lincoln Park", nights: "Thu & Sat" }],
+  ] as const) {
+    await me.page.goto("/discover");
+    await expect(me.page.getByText(`${mine.nights} from ${mine.home}.`)).toBeVisible();
+    await expect(me.page.getByText(`${theirs.nights} from ${theirs.home}.`)).toHaveCount(0);
+    await me.page.goto("/welcome");
+    await expect(me.page.getByRole("radio", { name: mine.home, exact: true })).toBeChecked();
+    await expect(me.page.getByRole("radio", { name: theirs.home, exact: true })).not.toBeChecked();
+    await expect(me.page.getByRole("radio", { name: mine.distance, exact: true })).toBeChecked();
+  }
 
   // Each person opens their own plan and its .ics, noting its ticket link, which must never reach the other.
   const ticketUrls = new Map<string, string>();
@@ -111,5 +151,63 @@ test("each person sees only their own saved plans", async ({ newPerson }) => {
     expect(ics.status(), "other's .ics is refused").toBe(404);
     // This text comes from the handler, after its sign-in check passed. A signed-out request gets a different 404.
     expect(await ics.text()).toBe("No such plan.");
+  }
+});
+
+test("the database refuses changes to another person's rows", async ({ newPerson }) => {
+  test.setTimeout(120_000);
+  // Each person makes their own preferences and plan straight through Supabase, which
+  // row-level security allows for your own rows. No Discover, so no Ticketmaster.
+  const setUp = async (me: Person, label: string) => {
+    const db = supabaseAs(me.page);
+    const home = `E2E home ${label}`;
+    expect(rowsOf(await db("POST", "preferences", testPreferences(home)))).toHaveLength(1);
+    const planName = `E2E plan ${label} ${me.user.id}`;
+    const made = rowsOf(await db("POST", "plans", testPlan(planName)));
+    expect(made).toHaveLength(1);
+    const planId = String(made[0].id);
+    me.created.push({ name: planName, href: `/plans/${planId}` });
+    return { me, home, planName, planId };
+  };
+  const rowsA = await setUp(await newPerson("db-a"), "A");
+  const rowsB = await setUp(await newPerson("db-b"), "B");
+
+  for (const [mine, theirs] of [
+    [rowsA, rowsB],
+    [rowsB, rowsA],
+  ]) {
+    const db = supabaseAs(mine.me.page);
+    const me = mine.me.user.id;
+    const them = theirs.me.user.id;
+
+    // Reading: only your own rows come back.
+    expect(rowsOf(await db("GET", "plans?select=id")), "plans visible").toEqual([{ id: mine.planId }]);
+    expect(rowsOf(await db("GET", "preferences?select=user_id")), "preferences visible").toEqual([{ user_id: me }]);
+
+    // Changing or deleting their rows matches nothing, while the same request on your own row works.
+    expect(rowsOf(await db("PATCH", `plans?id=eq.${mine.planId}`, { status: "saved" }))).toHaveLength(1);
+    expectNothingChanged(await db("PATCH", `plans?id=eq.${theirs.planId}`, { name: "Changed by someone else" }));
+    expectNothingChanged(await db("DELETE", `plans?id=eq.${theirs.planId}`));
+    expect(rowsOf(await db("PATCH", `preferences?user_id=eq.${me}`, { home_label: mine.home }))).toHaveLength(1);
+    expectNothingChanged(await db("PATCH", `preferences?user_id=eq.${them}`, { home_label: "Changed by someone else" }));
+    expectNothingChanged(await db("DELETE", `preferences?user_id=eq.${them}`));
+
+    // Putting rows into their account is refused outright.
+    expectRefused(await db("POST", "plans", { ...testPlan("Planted by someone else"), user_id: them }));
+    expectRefused(await db("PATCH", `plans?id=eq.${mine.planId}`, { user_id: them }));
+    expectRefused(await db("POST", "preferences", { ...testPreferences("Planted by someone else"), user_id: them }));
+  }
+
+  // Afterwards each person's rows are exactly as they made them, in the database and in the app.
+  for (const mine of [rowsA, rowsB]) {
+    const db = supabaseAs(mine.me.page);
+    const me = mine.me.user.id;
+    expect(rowsOf(await db("GET", "plans?select=id,name,user_id"))).toEqual([
+      { id: mine.planId, name: mine.planName, user_id: me },
+    ]);
+    expect(rowsOf(await db("GET", "preferences?select=user_id,home_label"))).toEqual([
+      { user_id: me, home_label: mine.home },
+    ]);
+    expect(await savedPlans(mine.me.page)).toEqual(mine.me.created);
   }
 });
