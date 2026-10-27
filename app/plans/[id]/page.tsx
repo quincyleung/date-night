@@ -1,7 +1,9 @@
 import { auth } from "@clerk/nextjs/server";
 import type { Metadata } from "next";
+import { navigation } from "next/cache";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { Suspense, type ReactNode } from "react";
 import { Badge, buttonClass, cardClass, Spinner, TextLink } from "@/components/ds";
 import { googleCalendarUrl } from "@/lib/calendar";
@@ -32,6 +34,11 @@ export default function PlanPage({ params }: PageProps<"/plans/[id]">) {
 }
 
 async function PlanDetail({ params }: { params: PageProps<"/plans/[id]">["params"] }) {
+  // Below here runs only when someone opens the page: not when a link prefetches it
+  // (navigation), and not in the prerender Next runs alongside each visit (connection).
+  // Either would cut off the Supabase query partway and log an error.
+  await navigation();
+  await connection();
   await auth.protect();
   const plan = await getMyPlan((await params).id);
   if (!plan) notFound();

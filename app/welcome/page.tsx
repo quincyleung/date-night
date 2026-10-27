@@ -1,5 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import type { Metadata } from "next";
+import { navigation } from "next/cache";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { ButtonLink, cardClass, EmptyState, Spinner } from "@/components/ds";
 import { getMyPreferences } from "@/lib/discover";
@@ -27,6 +29,11 @@ export default function WelcomePage() {
 }
 
 async function Welcome() {
+  // Below here runs only when someone opens the page: not when a link prefetches it
+  // (navigation), and not in the prerender Next runs alongside each visit (connection).
+  // Either would cut off the Supabase query partway and log an error.
+  await navigation();
+  await connection();
   await auth.protect();
   let saved: Preferences | null;
   try {

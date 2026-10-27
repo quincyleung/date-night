@@ -1,7 +1,9 @@
 import { auth } from "@clerk/nextjs/server";
 import type { Metadata } from "next";
+import { navigation } from "next/cache";
 import Image from "next/image";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { ButtonLink, cardClass, EmptyState, TextLink } from "@/components/ds";
 import { findEvents, getMyPreferences, isInChicagoArea, searchWindow } from "@/lib/discover";
@@ -28,6 +30,11 @@ export default function DiscoverPage({ searchParams }: PageProps<"/discover">) {
 }
 
 async function Discover({ searchParams }: { searchParams: PageProps<"/discover">["searchParams"] }) {
+  // Below here runs only when someone opens the page: not when a link prefetches it
+  // (navigation), and not in the prerender Next runs alongside each visit (connection).
+  // Either would cut off the Supabase query partway and log an error.
+  await navigation();
+  await connection();
   await auth.protect();
 
   let prefs: Preferences | null;

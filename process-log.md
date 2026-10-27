@@ -350,3 +350,20 @@
   - `[Clerk Testing] FAPI request failed … context or browser has been closed`: Clerk's helper tried to forward a request after cleanup closed the browser. Harmless; it printed a dev-browser token for the deleted test user, not the secret key or a password.
 - **Pushed back:** None.
 - **Caught:** None.
+
+## Step 25: Stop the prerender errors in the server log (2026-10-27, branch `e2e-and-review`)
+
+- **Asked:** Push, and make the fix for the step 24 log errors.
+- **Made:** two lines at the top of the four components that load user data (`Discover`, `Welcome`, `Plans`, `PlanDetail`), above `auth.protect()`:
+  - `await navigation()` (`next/cache`): link prefetches stop here, so they never check sign-in or query Supabase. With every cookie, header and URL read below it, Next serves those prefetches from the static build output.
+  - `await connection()` (`next/server`): `navigation()` alone wasn't enough. With partial prefetching on, Next also runs a hidden "runtime prerender" alongside each visit, including the re-render after a form action like Skip or Save, so the browser can cache the parts that don't change per request. `navigation()` lets that render through by design, so it still reached the uncached Supabase query and got cut off. `connection()` is Next's way to say "only for a real request", so that render stops before the query.
+- **Checked:** production builds, signed in as a throwaway Clerk test user, counting these errors in the server log:
+  - **Unfixed:** a scripted browse of Welcome, Discover and Plans logged 15 (Discover 10, Welcome 4, Plans 1).
+  - **`navigation()` only:** the same browse logged 7. Step by step, opening pages added none, but Skip, Save and opening a plan page each added one.
+  - **Both:** step by step, 0 at every step, including Skip and Save (their form submissions confirmed in the network log). A second run clicking between pages also logged 0. The whole scripted browse wasn't rerun on this build.
+  - Clicking between pages in the app (Discover → Plans → a plan → All plans → Discover → Change your defaults) shows each page's data.
+  - Signed out, `/plans` still redirects to sign-in. Types, lint and build pass.
+  - Afterward: the test user, their plan and preferences rows, the server and the browser were removed.
+  - The Playwright tests weren't rerun (they load `.env.local`, which needs the user's OK).
+- **Pushed back:** None.
+- **Caught:** None.

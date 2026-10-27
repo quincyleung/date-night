@@ -1,7 +1,9 @@
 import { auth } from "@clerk/nextjs/server";
 import type { Metadata } from "next";
+import { navigation } from "next/cache";
 import Image from "next/image";
 import Link from "next/link";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { Badge, ButtonLink, cardClass, EmptyState, focusRing, Spinner } from "@/components/ds";
 import { formatMoney, formatWhen } from "@/lib/format";
@@ -45,6 +47,11 @@ export default function PlansPage({ searchParams }: PageProps<"/plans">) {
 }
 
 async function Plans({ searchParams }: { searchParams: PageProps<"/plans">["searchParams"] }) {
+  // Below here runs only when someone opens the page: not when a link prefetches it
+  // (navigation), and not in the prerender Next runs alongside each visit (connection).
+  // Either would cut off the Supabase query partway and log an error.
+  await navigation();
+  await connection();
   await auth.protect();
   const { tab } = await searchParams;
   const current = TABS.find((t) => t.status === tab) ?? TABS[0];
