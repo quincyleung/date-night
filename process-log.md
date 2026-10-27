@@ -439,3 +439,18 @@
 - **Checked:** types, lint and build pass. Not run in a browser or the end-to-end tests yet.
 - **Pushed back:** None.
 - **Caught:** None.
+
+## Step 32: Check the branch and merge it into `main` (2026-10-27)
+
+- **Asked:** If everything looks good, merge and push.
+- **Checked:** step 31 hadn't been through the end-to-end tests, which need the user's OK to load `.env.local`. So I checked it in a production build, signed in as a throwaway Clerk test user:
+  - Skip, Save, the Plans list, a plan page and Discover all work, with 0 prerender errors in the server log;
+  - Discover marks the saved event as Saved, and the Saved tab lists exactly that plan;
+  - the plan page shows its name, and its `.ics` downloads (200, `text/calendar`);
+  - a made-up plan ID shows "This page could not be found." and its `.ics` returns 404 "No such plan.";
+  - clicking between Discover, Plans, a plan, All plans and Welcome shows each page's data;
+  - types, lint (whole project) and build pass.
+  - Afterward the test user, their plan and preferences rows, the server and the browser were removed.
+- **Merged:** `e2e-and-review` into `main` by fast-forward, and pushed both. `main` now has the end-to-end tests, the prerender fix, the plan-read filter, and steps 18–32 of this log.
+- **Pushed back:** None.
+- **Caught:** None.
