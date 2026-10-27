@@ -248,3 +248,12 @@
   - **Tested** in headless Chrome with a new Clerk test user, deleted afterward with its rows: saved two events from Discover; Remove → Keep it left it alone; Remove → Yes, remove deleted that row only (checked in Supabase), landed on Saved, and its Discover card said "Save" again; the other event, made the plan, had no Remove button.
 - **Pushed back:** None.
 - **Caught:** None.
+
+## Step 18: Merge into main (2026-10-27)
+
+- **Asked:** "if everything looks good you can pull into main"
+- **Made:**
+  - Checked first: `main` had no commits missing from `features`; types, lint and the production build pass; every Server Function and Route Handler checks `auth()`; no keys in any of the 11 commits (the GitHub repo is public).
+  - Merged `features` into `main` (fast-forward, no conflicts) and pushed both branches. `gh` isn't installed, so there's no pull request on GitHub, same as the `auth` merge.
+- **Pushed back:** None.
+- **Caught:** None.
