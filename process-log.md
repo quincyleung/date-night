@@ -426,3 +426,16 @@
   - this run added four preferences rows, as every run does.
 - **Pushed back:** None.
 - **Caught:** None.
+
+## Step 31: Filter plan reads by user in the app too (2026-10-27, branch `e2e-and-review`)
+
+- **Asked:** after the security review found nothing on the branch, I suggested a second layer for plan reads, since step 28 showed row-level security was the only thing keeping them to their owner. The user asked to implement it.
+- **Made:** `lib/plans.ts`:
+  - `getMyPlans` and `getMyPlan` now also ask only for rows where `user_id` is the signed-in person's Clerk ID (`.eq("user_id", userId)`);
+  - a small `myUserId()` reads it with `auth()` and throws if there's no user. Every caller already checks sign-in first, so that should never happen.
+  - Row-level security is unchanged and still enforces the same rule in the database.
+- **What it covers:** the app's own pages, the `.ics` download and the plan actions, which all read through these two functions. It doesn't cover someone calling Supabase directly with their own token; only the policies stop that.
+- **Not changed:** `getMyPreferences` and the plan writes in `app/plans/actions.ts` still rely only on row-level security to pick the person's rows.
+- **Checked:** types, lint and build pass. Not run in a browser or the end-to-end tests yet.
+- **Pushed back:** None.
+- **Caught:** None.
