@@ -293,3 +293,28 @@
   - Types, lint and build pass. Not run, as asked.
 - **Pushed back:** None.
 - **Caught:** None.
+
+## Step 22: Review the isolation test and apply fixes (2026-10-27, branch `e2e-and-review`)
+
+- **Asked:** Run the `test-reviewer` agent on the new test and setup files and show the findings before changing anything. Then: apply H1, M2, L1, L3 and M3; option B for L2; leave H2 and M1 for later.
+- **Review:** The agent wasn't loaded until a new session started (Claude Code reads `.claude/agents/` at start); a stand-in run was interrupted, then the real agent ran, read-only, with no hints about what to look for. It confirmed the read checks would catch a leak and every selector matches the app. Findings:
+  - **H1:** cleanup removed every saved plan the user could see, so broken isolation would delete real users' plans.
+  - **H2:** writes aren't tested.
+  - **M1:** preferences aren't tested, and both users get identical defaults.
+  - **M2:** the "Ticketmaster is down" check looked for a heading, but the message is a paragraph (confirmed in the code).
+  - **M3:** the test reused whatever server was on :3000, in dev mode.
+  - **L1:** a 404 for the other person's .ics would also come from a signed-out request.
+  - **L2:** deleting a user whose plans couldn't be removed leaves rows no one can remove through the app.
+  - **L3:** the refusal check only looked at what's shown.
+  - **L4:** failure traces hold short-lived tokens (local only).
+- **Made:**
+  - **H1:** each person records the exact plan the test saved (by link, and only if exactly one Saved entry has that name). Cleanup removes only those, and throws if any other saved plan is showing, leaving it untouched.
+  - **M2:** waits for events or any of Discover's no-events messages and names the one shown. A refused Save tries the next event.
+  - **M3:** the test builds the app and runs `next start` on port 3100 (`reuseExistingServer: false`).
+  - **L1:** the other person's .ics must return 404 with "No such plan.", which only the handler sends after its sign-in check.
+  - **L3:** the other person's plan page, including Next's embedded data, must not contain that event's ticket link. The on-screen check matches the exact name, since a name like "Chicago" or "Page" could otherwise match the page's own text.
+  - **L2 (option B):** if a person's plans couldn't be removed, their Clerk user is kept and its ID reported so someone can sign in and finish. Someone who never signed in is deleted directly.
+  - Types and lint pass. Not run.
+- **Pushed back:** None.
+- **Caught:** L2 conflicted with the original cleanup instruction; the user chose to keep the user when removal fails.
+- **Later:** H2 (write isolation through Supabase directly, limited to test rows) and M1 (A picks different preferences).

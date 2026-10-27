@@ -6,7 +6,8 @@ import { defineConfig, devices } from "@playwright/test";
 // already set in the shell win over the file.
 if (existsSync(".env.local")) process.loadEnvFile(".env.local");
 
-const baseURL = process.env.E2E_BASE_URL ?? "http://localhost:3000";
+const port = 3100;
+const baseURL = `http://localhost:${port}`;
 
 export default defineConfig({
   testDir: "./tests",
@@ -16,7 +17,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: 0,
   reporter: "list",
-  // The dev server compiles each page on its first visit, which can take more than the default 5 s.
+  // Pages wait on Supabase and Ticketmaster, which can take longer than the default 5 s.
   expect: { timeout: 15_000 },
   use: {
     baseURL,
@@ -30,9 +31,11 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm run dev",
+    // A production build on its own port, so the test runs this branch's code as it
+    // ships, not whatever dev server happens to be on :3000.
+    command: `npm run build && npm run start -- -p ${port}`,
     url: baseURL,
-    reuseExistingServer: true,
-    timeout: 120_000,
+    reuseExistingServer: false,
+    timeout: 300_000,
   },
 });
