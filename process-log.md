@@ -454,3 +454,12 @@
 - **Merged:** `e2e-and-review` into `main` by fast-forward, and pushed both. `main` now has the end-to-end tests, the prerender fix, the plan-read filter, and steps 18–32 of this log.
 - **Pushed back:** None.
 - **Caught:** None.
+
+## Step 33: End-to-end tests with the plan-read filter (2026-10-27, branch `e2e-and-review`)
+
+- **Asked:** `npx playwright test`, after asking what to do next (deploying on Vercel was suggested, with this run first).
+- **Result:** both tests passed in 58.5 s, including the production build: "each person sees only their own preferences and saved plans" (20.0 s) and "the database refuses changes to another person's rows" (8.2 s). So step 31's filter changed nothing a user can see.
+- **Server log:** 0 prerender errors; one harmless `[Clerk Testing] FAPI request failed … closed` line during cleanup.
+- **Cleanup checked afterward:** this run's Clerk users are gone; only the two kept in step 28 remain. `plans` holds only the owner's real plan, untouched.
+- **Pushed back:** None.
+- **Caught:** None.
