@@ -376,3 +376,15 @@
 - **Cleanup checked afterward:** no `date-night-e2e` users left in Clerk, no plans left from the run, and four new preferences rows, as expected.
 - **Pushed back:** None.
 - **Caught:** None.
+
+## Step 27: Temporarily open up reading plans (2026-10-27, branch `e2e-and-review`)
+
+- **Asked:** A temporary migration replacing the plans select policy with one that allows everyone (`using (true)`). Show the SQL, then apply it.
+- **Made:** migration `temp_plans_select_open_to_all` (version `20261027171448`), applied to Supabase:
+  - drops "Read own plans" and creates "TEMPORARY read all plans" (`for select to authenticated using (true)`);
+  - kept `to authenticated` like the other policies. `anon` has no SELECT grant on `plans`, so `to public` would let in the same people: every signed-in user, and no signed-out requests;
+  - not added to `supabase/migrations/`, so it can't be committed to the public repo by accident. The database's migration history does list it.
+- **Effect while it's in place:** the app's plan reads have no user filter of their own (`lib/plans.ts`), so every signed-in user sees everyone's plans in their list, on plan pages and in `.ics` downloads, locally and on the deployed app. Changes and deletes are still limited to your own rows by their own policies.
+- **Still to do:** put "Read own plans" back.
+- **Pushed back:** None.
+- **Caught:** None.
