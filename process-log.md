@@ -237,3 +237,14 @@
 - **Pushed back:** None.
 - **Caught:** The .ics request conflicted with the AGENTS.md rule; the user chose to change the rule.
 - **Follow-up (same step):** Plans cards now say "From $X for two" when tickets vary, matching Discover.
+
+## Step 17: Remove a saved event (2026-10-27, branch `features`)
+
+- **Asked:** "please add a way to remove a saved event. and please push"
+- **Made:**
+  - A saved event's page ends with **Remove from Saved**. It asks once ("Remove this event from Saved?" with **Yes, remove** and **Keep it**), since there's no undo. Focus moves to Keep it, and back to Remove when you cancel.
+  - Removing deletes the row and goes back to the Saved tab. Discover's card for it shows "Save" again.
+  - Only saved events can be removed. A plan has to go back to Saved first, and history (Went) stays. The `removePlan` Server Function checks `auth()`, re-reads the plan through row-level security, and deletes only if it is still `saved`.
+  - **Tested** in headless Chrome with a new Clerk test user, deleted afterward with its rows: saved two events from Discover; Remove → Keep it left it alone; Remove → Yes, remove deleted that row only (checked in Supabase), landed on Saved, and its Discover card said "Save" again; the other event, made the plan, had no Remove button.
+- **Pushed back:** None.
+- **Caught:** None.

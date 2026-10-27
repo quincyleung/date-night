@@ -1,6 +1,7 @@
 "use server";
 import { auth } from "@clerk/nextjs/server";
 import { refresh } from "next/cache";
+import { redirect } from "next/navigation";
 import { getMyPlan, hasStarted } from "@/lib/plans";
 import { createSupabaseClient } from "@/lib/supabase";
 
@@ -33,6 +34,20 @@ export async function unplan(id: string) {
     .eq("status", "planned");
   if (error) throw new Error(`Moving the plan back failed: ${error.message}`);
   refresh();
+}
+
+/** Removes a saved event. A plan goes back to Saved before it can be removed; history stays. */
+export async function removePlan(id: string) {
+  const { userId } = await auth();
+  if (!userId) return;
+  const plan = await getMyPlan(id);
+  if (!plan || plan.status !== "saved") return;
+
+  const { error } = await createSupabaseClient().from("plans").delete().eq("id", plan.id).eq("status", "saved");
+  if (error) throw new Error(`Removing the event failed: ${error.message}`);
+  // Drops kept copies of Discover, so its card shows "Save" again.
+  refresh();
+  redirect("/plans?tab=saved");
 }
 
 export type RateState = { error: string | null; saved: boolean };

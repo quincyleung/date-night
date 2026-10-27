@@ -10,6 +10,7 @@ import { formatMoney, formatWhen } from "@/lib/format";
 import { getMyPlan, hasStarted, STATUS_LABELS, type Plan, type PlanStatus } from "@/lib/plans";
 import { makePlan, unplan } from "../actions";
 import { RatingForm } from "./rating-form";
+import { RemoveButton } from "./remove-button";
 
 export const metadata: Metadata = { title: "Plan · Date Night" };
 
@@ -109,6 +110,12 @@ async function PlanDetail({ params }: { params: PageProps<"/plans/[id]">["params
           Tickets on Ticketmaster<span className="sr-only"> (opens in a new tab)</span>
         </TextLink>
       </span>
+
+      {plan.status === "saved" && (
+        <div className="flex flex-col border-t border-(--ds-border) pt-6">
+          <RemoveButton id={plan.id} />
+        </div>
+      )}
     </article>
   );
 }
